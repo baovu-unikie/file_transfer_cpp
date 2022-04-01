@@ -40,7 +40,7 @@ void IPCPipeReceive::receive()
 		if (this->ipc_info.read_bytes > 0)
 		{
 			this->write_to_file(this->buffer, this->ipc_info.read_bytes);
-			this->timer.update_begin();
+			this->timer.update_all();
 			std::cout << "." << std::flush; // number of dots = number of received msgs.
 		}
 		this->timer.update_end();

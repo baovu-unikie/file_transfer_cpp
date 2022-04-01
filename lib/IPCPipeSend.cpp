@@ -53,8 +53,12 @@ void IPCPipeSend::init()
 
 	this->open_file();
 	this->ipc_info.file_size = this->get_file_size();
+	if(this->ipc_info.file_size == 0)
+	{
+		this->cleanup();
+		throw std::runtime_error("ERROR: File size = 0.");
+	}
 	this->buffer = new char[this->p_msgsize];
-	this->timeout = 60;
 }
 
 void IPCPipeSend::print_members() const
@@ -75,11 +79,11 @@ void IPCPipeSend::send()
 			throw std::runtime_error("ERROR: istream::read().");
 
 		this->ipc_info.read_bytes = this->fs.gcount();
-		if (this->ipc_info.read_bytes > 0)
+		if (this->ipc_info.read_bytes >= 0)
 		{
 			errno = 0; // clear errno
 			this->ipc_info.sent_bytes = write(this->pd, this->buffer, this->ipc_info.read_bytes);
-			if (this->ipc_info.sent_bytes == this->ipc_info.read_bytes)
+			if (this->ipc_info.sent_bytes == this->ipc_info.read_bytes && this->ipc_info.sent_bytes != 0)
 			{
 				this->ipc_info.total_sent_bytes += this->ipc_info.sent_bytes;
 				this->timer.update_all();
@@ -116,12 +120,14 @@ void IPCPipeSend::send()
 		}
 	}
 
-	if (this->ipc_info.total_sent_bytes == this->ipc_info.file_size)
+	if (this->ipc_info.total_sent_bytes == this->ipc_info.file_size && this->ipc_info.sent_bytes != 0)
+	{
 		std::cout << "Sent " << this->ipc_info.total_sent_bytes << " byte(s)." << std::endl;
+	}
 	else
 	{
 		cleanup();
-		throw std::runtime_error("ERROR: Uncompleted transfer.");
+		throw std::runtime_error("ERROR: Uncompleted transfer");
 	}
 }
 
