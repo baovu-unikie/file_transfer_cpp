@@ -1,0 +1,17 @@
+# Ignore everything
+/*
+/*/
+
+# Except for
+!.bazelrc
+!.gitignore
+!README.md
+!WORKSPACE
+!build_and_test.sh
+!data/BUILD
+!data/readTestFile
+!environment_setup.sh
+!uml/
+!lib/
+!app/
+!test/
