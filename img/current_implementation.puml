@@ -1,0 +1,111 @@
+@startuml
+class IPC
+{
+	# std::fstream fs{}
+	# ipc_option_t opts{}
+	# long timeout{10}
+	# char *buffer{nullptr}
+	# ChronoTime timer{}
+	# ipc_info_t ipc_info{}
+
+	+ IPC(ipc_option_t options)
+	+ virtual ~IPC()
+
+	+ unsigned long get_file_size() const
+	+ virtual void cleanup()
+	+ virtual void init(){}
+	+ virtual void print_members() const
+	+ virtual void receive(){}
+	+ virtual void send(){}
+	+ void open_file()
+	+ void write_to_file(char *data, std::streamsize data_size)
+}
+
+class IPCMsgQSend
+{
+	# mqd_t mqd{}
+	# struct mq_attr attr{0, 10, 8192, 0}
+	# unsigned mq_priority{MQ_PRIO_MAX - 1}
+
+	+ IPCMsgQSend(ipc_options_t options) : IPC(options)
+	+ ~IPCMsgQSend() override
+
+	+ void cleanup() override
+	+ void init()
+	+ void print_members() const override
+	+ void send()
+}
+
+class IPCMsgReceive
+{
+	+ IPCMsgQReceive(ipc_options_t options) : IPCMsgQSend(options)
+	+ void init()
+	+ void receive()
+}
+
+enum IPCProtocol<<enumeration>>
+{
+	NONE
+	MSG_QUEUE
+	PIPE
+	SHARED_MEM
+}
+
+enum IPCMode<<enumeration>>
+{
+	SEND_MODE
+	RECEIVE_MODE
+}
+
+class ipc_option_t << (S,lightblue) struct>>
+{
+	+ IPCMode mode{}
+	+ IPCProtocol protocol{NONE}
+	+ std::string server_name{}
+	+ std::string file_name{}
+	+ size_t mem_size{0}
+}
+
+class ipc_info_t << (S,lightblue) struct>>
+{
+	+ long number_of_msg{}
+	+ long read_bytes{}
+	+ long sent_bytes{}
+	+ unsigned long file_size{}
+	+ unsigned long total_sent_bytes{}
+}
+
+class ipc_shm_header_t << (S,lightblue) struct>>
+{
+	+ pthread_cond_t cond
+	+ pthread_mutex_t mutex
+	+ size_t data_size
+	+ size_t data_version
+	+ size_t shared_mem_size
+	+ volatile bool is_init
+	+ volatile bool is_read
+	+ char data_ap[0]
+}
+
+class ChronoTime
+{
+	# std::chrono::time_point<std::chrono::system_clock> begin{}
+	# std::chrono::time_point<std::chrono::system_clock> end{}
+	# long duration{}
+
+	+ void update_all()
+	+ void update_begin()
+	+ void update_end()
+	+ long get_duration()
+}
+
+IPC <|-- IPCMsgQSend
+IPCMsgQSend <|-- IPCMsgReceive
+
+IPCProtocol -- ipc_option_t
+ipc_option_t -- IPC
+ipc_option_t -- IPCMode
+ipc_info_t --  IPC
+ChronoTime -- IPC
+
+@enduml
