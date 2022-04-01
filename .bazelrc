@@ -1,0 +1,2 @@
+# set default C++ standard version
+build --cxxopt="--std=c++14"
