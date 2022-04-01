@@ -43,6 +43,28 @@ class IPCMsgReceive
 	+ void receive()
 }
 
+class IPCPipeSend
+{
+	# int pd{0}
+	# std::streamsize p_msgsize{PIPE_BUF}
+
+	+ IPCPipeSend(ipc_options_t options) : IPC(options)
+	+ ~IPCPipeSend() override
+
+	+ void init()
+	+ void cleanup() override
+	+ void send()
+	+ void print_members() const override
+
+}
+
+class IPCPipeReceive
+{
+	+ IPCPipeReceive(ipc_options_t options) : IPCPipeSend(options)
+	+ void init()
+	+ void receive()
+}
+
 enum ipc_protocol_t<<enumeration>>
 {
 	NONE
@@ -100,7 +122,10 @@ class ChronoTime
 }
 
 IPC <|-- IPCMsgQSend
+IPC <|-- IPCPipeSend
+
 IPCMsgQSend <|-- IPCMsgReceive
+IPCPipeSend <|-- IPCPipeReceive
 
 ipc_protocol_t -- ipc_option_t
 ipc_option_t -- IPC

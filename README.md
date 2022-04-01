@@ -38,7 +38,15 @@ ipc_receive -q /queue_name -f file_name
 
 ### Pipe
 - Sender
+```bash
+ipc_send -p pipe_name -f file_to_send
+```
+
 - Receiver
+```bash
+ipc_receive -p pipe_name -f file_name
+```
+
 ### Shared Memory
 - Sender
 - Receiver
@@ -50,7 +58,7 @@ ipc_receive -q /queue_name -f file_name
     - [x] Functional
     - [ ] Test cases
 - [ ] Pipe
-    - [ ] Functional
+    - [x] Functional
     - [ ] Test cases
 - [ ] Shared Memory
     - [ ] Functional

@@ -138,4 +138,33 @@ class IPCMsgQReceive : public IPCMsgQSend
 		void receive() final;
 };
 
+class IPCPipeSend : public IPC
+{
+	protected:
+		int pd{0};
+		std::streamsize p_msgsize{PIPE_BUF};
+	public:
+		// Constructor
+		explicit IPCPipeSend(ipc_options_t options) : IPC(options)
+		{};
+		~IPCPipeSend() override;
+		// Methods
+		void cleanup() override;
+		void init();
+		void print_members() const override;
+		void send();
+
+};
+
+class IPCPipeReceive : public IPCPipeSend
+{
+	public:
+		// Constructor
+		explicit IPCPipeReceive(ipc_options_t options) : IPCPipeSend(options)
+		{};
+		// Methods
+		void init();
+		void receive();
+};
+
 #endif //FILE_TRANSFER_CPP_IPC_H
