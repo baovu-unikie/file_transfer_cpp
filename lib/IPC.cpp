@@ -157,7 +157,9 @@ void ipc_start(ipc_options_t *options)
 		}
 		else if (options->protocol == IPCProtocol::PIPE)
 		{
-			std::cout << "PIPE: Not implemented yet." << std::endl;
+			IPCPipeReceive pipe{*options};
+			pipe.print_members();
+			pipe.auto_start();
 		}
 		else if (options->protocol == IPCProtocol::SHARED_MEM)
 		{
@@ -174,7 +176,9 @@ void ipc_start(ipc_options_t *options)
 		}
 		else if (options->protocol == IPCProtocol::PIPE)
 		{
-			std::cout << "PIPE: Not implemented yet." << std::endl;
+			IPCPipeSend pipe{*options};
+			pipe.print_members();
+			pipe.auto_start();
 		}
 		else if (options->protocol == IPCProtocol::SHARED_MEM)
 		{

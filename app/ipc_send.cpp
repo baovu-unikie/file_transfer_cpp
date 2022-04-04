@@ -7,11 +7,7 @@
 
 int main(int argc, char *argv[])
 {
-<<<<<<< HEAD
-	ipc_options_t *options = ipc_get_options(SEND_MODE, argc, argv);
-=======
 	ipc_options_t *options = ipc_get_options(IPCMode::SEND_MODE, argc, argv);
->>>>>>> MsgQ
 	ipc_start(options);
 	return 0;
 }
