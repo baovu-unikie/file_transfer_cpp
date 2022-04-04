@@ -65,7 +65,7 @@ class IPCPipeReceive
 	+ void receive()
 }
 
-enum ipc_protocol_t<<enumeration>>
+enum IPCProtocol<<enumeration>>
 {
 	NONE
 	MSG_QUEUE
@@ -73,7 +73,7 @@ enum ipc_protocol_t<<enumeration>>
 	SHARED_MEM
 }
 
-enum ipc_mode_t<<enumeration>>
+enum IPCMode<<enumeration>>
 {
 	SEND_MODE
 	RECEIVE_MODE
@@ -81,8 +81,8 @@ enum ipc_mode_t<<enumeration>>
 
 class ipc_option_t << (S,lightblue) struct>>
 {
-	+ ipc_mode_t mode{}
-	+ ipc_protocol_t protocol{NONE}
+	+ IPCMode mode{}
+	+ IPCProtocol protocol{NONE}
 	+ std::string server_name{}
 	+ std::string file_name{}
 	+ size_t mem_size{0}
@@ -127,9 +127,9 @@ IPC <|-- IPCPipeSend
 IPCMsgQSend <|-- IPCMsgReceive
 IPCPipeSend <|-- IPCPipeReceive
 
-ipc_protocol_t -- ipc_option_t
+IPCProtocol -- ipc_option_t
 ipc_option_t -- IPC
-ipc_option_t -- ipc_mode_t
+ipc_option_t -- IPCMode
 ipc_info_t --  IPC
 ChronoTime -- IPC
 

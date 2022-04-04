@@ -27,8 +27,8 @@ void IPC::cleanup()
 
 void IPC::print_members() const
 {
-	std::cout << "Mode: " << opts.mode << "\n"
-			  << "Protocol: " << opts.protocol << "\n"
+	std::cout << "Mode: " << static_cast<std::underlying_type<IPCMode>::type>(opts.mode) << "\n"
+			  << "Protocol: " << static_cast<std::underlying_type<IPCProtocol>::type>(opts.protocol) << "\n"
 			  << "server_name: " << opts.server_name << "\n"
 			  << "file_name: " << opts.file_name << "\n"
 			  << "mem_size: " << opts.mem_size << "\n"
@@ -42,24 +42,24 @@ void IPC::print_members() const
 void IPC::auto_start()
 {
 	this->init();
-	if (this->opts.mode == SEND_MODE)
+	if (this->opts.mode == IPCMode::SEND_MODE)
 		this->send();
-	if (this->opts.mode == RECEIVE_MODE)
+	if (this->opts.mode == IPCMode::RECEIVE_MODE)
 		this->receive();
 }
 
 void IPC::open_file()
 {
-	if (this->opts.mode == SEND_MODE)
+	if (this->opts.mode == IPCMode::SEND_MODE)
 		this->fs.open(opts.file_name, std::fstream::in | std::fstream::binary);
-	if (this->opts.mode == RECEIVE_MODE)
+	if (this->opts.mode == IPCMode::RECEIVE_MODE)
 		this->fs.open(opts.file_name, std::fstream::out | std::fstream::trunc | std::fstream::binary);
 
 	if (this->fs.fail()) // Check logical error on I/O operation (close/open)
 		throw std::runtime_error("ERROR: " + this->opts.file_name + ": " + strerror(errno));
 }
 
-void IPC::write_to_file(char *data, std::streamsize data_size)
+void IPC::write_to_file(char *data, std::streamsize &data_size)
 {
 	this->fs.write(data, data_size);
 	if (this->fs.bad()) // check read/writing error on i/o operation
@@ -71,7 +71,7 @@ void IPC::write_to_file(char *data, std::streamsize data_size)
 /* Non-member function definitions ********************************************/
 /******************************************************************************/
 
-ipc_options_t *ipc_get_options(ipc_mode_t mode, int argc, char *argv[])
+ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[])
 {
 	auto *options = new ipc_options_t;
 	std::vector<std::string> arg_list{};
@@ -92,7 +92,7 @@ ipc_options_t *ipc_get_options(ipc_mode_t mode, int argc, char *argv[])
 
 	for (size_t i{0}; i < arg_list_size; i++)
 	{
-		if ((arg_list.at(i) == "--help" || arg_list.at(i) == "-h") && options->protocol == NONE)
+		if ((arg_list.at(i) == "--help" || arg_list.at(i) == "-h") && options->protocol == IPCProtocol::NONE)
 		{
 			ipc_usage(mode, false);
 			exit(EXIT_SUCCESS);
@@ -102,14 +102,14 @@ ipc_options_t *ipc_get_options(ipc_mode_t mode, int argc, char *argv[])
 			ipc_usage(mode, true);
 		}
 			/* options with one argument */
-		else if ((arg_list.at(i) == "--queue" || arg_list.at(i) == "-q") && options->protocol == NONE)
+		else if ((arg_list.at(i) == "--queue" || arg_list.at(i) == "-q") && options->protocol == IPCProtocol::NONE)
 		{
-			options->protocol = MSG_QUEUE;
+			options->protocol = IPCProtocol::MSG_QUEUE;
 			options->server_name = arg_list.at(++i);
 		}
-		else if ((arg_list.at(i) == "--pipe" || arg_list.at(i) == "-p") && options->protocol == NONE)
+		else if ((arg_list.at(i) == "--pipe" || arg_list.at(i) == "-p") && options->protocol == IPCProtocol::NONE)
 		{
-			options->protocol = PIPE;
+			options->protocol = IPCProtocol::PIPE;
 			options->server_name = arg_list.at(++i);
 		}
 
@@ -122,9 +122,9 @@ ipc_options_t *ipc_get_options(ipc_mode_t mode, int argc, char *argv[])
 		{
 			ipc_usage(mode, true);
 		}
-		else if ((arg_list.at(i) == "--shm" || arg_list.at(i) == "-s") && options->protocol == NONE)
+		else if ((arg_list.at(i) == "--shm" || arg_list.at(i) == "-s") && options->protocol == IPCProtocol::NONE)
 		{
-			options->protocol = SHARED_MEM;
+			options->protocol = IPCProtocol::SHARED_MEM;
 			options->server_name = arg_list.at(++i);
 			try
 			{
@@ -147,50 +147,46 @@ ipc_options_t *ipc_get_options(ipc_mode_t mode, int argc, char *argv[])
 
 void ipc_start(ipc_options_t *options)
 {
-	if (options->mode == RECEIVE_MODE)
+	if (options->mode == IPCMode::RECEIVE_MODE)
 	{
-		if (options->protocol == MSG_QUEUE)
+		if (options->protocol == IPCProtocol::MSG_QUEUE)
 		{
 			IPCMsgQReceive mq{*options};
 			mq.print_members();
 			mq.auto_start();
 		}
-		else if (options->protocol == PIPE)
+		else if (options->protocol == IPCProtocol::PIPE)
 		{
-			IPCPipeReceive pipe{*options};
-			pipe.print_members();
-			pipe.auto_start();
+			std::cout << "PIPE: Not implemented yet." << std::endl;
 		}
-		else if (options->protocol == SHARED_MEM)
+		else if (options->protocol == IPCProtocol::SHARED_MEM)
 		{
 			std::cout << "SHARD_MEM: Not implemented yet." << std::endl;
 		}
 	}
-	else if (options->mode == SEND_MODE)
+	else if (options->mode == IPCMode::SEND_MODE)
 	{
-		if (options->protocol == MSG_QUEUE)
+		if (options->protocol == IPCProtocol::MSG_QUEUE)
 		{
 			IPCMsgQSend mq{*options};
 			mq.print_members();
 			mq.auto_start();
 		}
-		else if (options->protocol == PIPE)
+		else if (options->protocol == IPCProtocol::PIPE)
 		{
-			IPCPipeSend pipe{*options};
-			pipe.print_members();
-			pipe.auto_start();
+			std::cout << "PIPE: Not implemented yet." << std::endl;
 		}
-		else if (options->protocol == SHARED_MEM)
+		else if (options->protocol == IPCProtocol::SHARED_MEM)
 		{
 			std::cout << "SHARD_MEM: Not implemented yet." << std::endl;
 		}
 	}
 }
 
-void ipc_usage(ipc_mode_t mode, bool is_exit)
+void ipc_usage(IPCMode mode, bool is_exit)
 {
 	std::string cmd{}, description{}, example1{}, example2{}, example3{};
-	if (mode == SEND_MODE)
+	if (mode == IPCMode::SEND_MODE)
 	{
 		cmd = "ipc_send";
 		description = "sends a file using a specified protocol.";
@@ -198,7 +194,7 @@ void ipc_usage(ipc_mode_t mode, bool is_exit)
 		example2 = "ipc_send -f file_to_send -p pipe_name";
 		example3 = "ipc_send -f file_to_send -s /shm_name 4";
 	}
-	if (mode == RECEIVE_MODE)
+	if (mode == IPCMode::RECEIVE_MODE)
 	{
 		cmd = "ipc_receive";
 		description = "receives file using a specified protocol";
@@ -238,7 +234,7 @@ void ipc_usage(ipc_mode_t mode, bool is_exit)
 void ipc_validate_options(ipc_options_t *options)
 {
 	bool is_valid{true};
-	if (options->protocol == MSG_QUEUE || options->protocol == SHARED_MEM)
+	if (options->protocol == IPCProtocol::MSG_QUEUE || options->protocol == IPCProtocol::SHARED_MEM)
 	{
 		if (options->server_name.at(0) != '/' || options->server_name.size() == 1)
 		{
@@ -246,7 +242,7 @@ void ipc_validate_options(ipc_options_t *options)
 			is_valid = false;
 		}
 
-		if (options->protocol == SHARED_MEM && (options->mem_size == 0 || options->mem_size > SHARED_MEM_LIMIT_IN_KB))
+		if (options->protocol == IPCProtocol::SHARED_MEM && (options->mem_size == 0 || options->mem_size > SHARED_MEM_LIMIT_IN_KB))
 		{
 			std::cout << "ERROR: Invalid memory size. It should be in range [1,"
 					  << SHARED_MEM_LIMIT_IN_KB << "]." << std::endl;

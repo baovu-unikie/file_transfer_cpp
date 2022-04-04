@@ -7,7 +7,11 @@
 
 int main(int argc, char *argv[])
 {
+<<<<<<< HEAD
 	ipc_options_t *options = ipc_get_options(RECEIVE_MODE, argc, argv);
+=======
+	ipc_options_t *options = ipc_get_options(IPCMode::RECEIVE_MODE, argc, argv);
+>>>>>>> MsgQ
 	ipc_start(options);
 	return 0;
 }

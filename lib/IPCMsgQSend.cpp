@@ -47,6 +47,11 @@ void IPCMsgQSend::init()
 
 	this->open_file();
 	this->ipc_info.file_size = this->get_file_size();
+	if(this->ipc_info.file_size == 0)
+	{
+		this->cleanup();
+		throw std::runtime_error("ERROR: File size = 0.");
+	}
 	this->buffer = new char[this->attr.mq_msgsize];
 	this->timer.update_all();
 }

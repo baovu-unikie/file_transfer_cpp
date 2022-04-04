@@ -37,7 +37,6 @@ ipc_receive -q /queue_name -f file_name
 
 
 ### Pipe
-- Sender
 ```bash
 ipc_send -p pipe_name -f file_to_send
 ```

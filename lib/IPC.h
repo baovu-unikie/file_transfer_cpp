@@ -22,20 +22,20 @@
 
 #define SHARED_MEM_LIMIT_IN_KB 10240
 
-typedef enum
+enum class IPCProtocol
 {
 	NONE, MSG_QUEUE, PIPE, SHARED_MEM
-} ipc_protocol_t;
+};
 
-typedef enum
+enum class IPCMode
 {
 	SEND_MODE, RECEIVE_MODE
-} ipc_mode_t;
+};
 
 typedef struct ipc_options_t
 {
-	ipc_mode_t mode{};
-	ipc_protocol_t protocol{NONE};
+	IPCMode mode{};
+	IPCProtocol protocol{IPCProtocol::NONE};
 	std::string server_name{};
 	std::string file_name{};
 	size_t mem_size{0};
@@ -62,9 +62,9 @@ typedef struct ipc_shm_header_t
 	char data_ap[0]; // data access point - must always be the last member of the struct
 } ipc_shm_header_t;
 
-ipc_options_t *ipc_get_options(ipc_mode_t mode, int argc, char *argv[]);
+ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[]);
 void ipc_start(ipc_options_t *options);
-void ipc_usage(ipc_mode_t mode, bool is_exit);
+void ipc_usage(IPCMode mode, bool is_exit);
 void ipc_validate_options(ipc_options_t *options);
 void print_wait_msg(const std::string &msg);
 
@@ -80,7 +80,7 @@ class IPC
 
 	public:
 		// Constructor
-		explicit IPC(ipc_options_t options) : opts(options)
+		explicit IPC(ipc_options_t &options) : opts(options)
 		{};
 
 		// Virtual destructor
@@ -104,7 +104,7 @@ class IPC
 		virtual void send(){};
 		void auto_start();
 		void open_file();
-		void write_to_file(char *data, std::streamsize data_size);
+		void write_to_file(char *data, std::streamsize &data_size);
 };
 
 class IPCMsgQSend : public IPC
@@ -131,7 +131,7 @@ class IPCMsgQReceive : public IPCMsgQSend
 {
 	public:
 		// Constructor
-		explicit IPCMsgQReceive(ipc_options_t options) : IPCMsgQSend(options)
+		explicit IPCMsgQReceive(ipc_options_t &options) : IPCMsgQSend(options)
 		{};
 		// Methods
 		void init() final;
