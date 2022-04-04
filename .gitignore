@@ -8,7 +8,7 @@
 !README.md
 !WORKSPACE
 !build_and_test.sh
-!data/
+!data/BUILD
 !environment_setup.sh
 !img/
 !lib/

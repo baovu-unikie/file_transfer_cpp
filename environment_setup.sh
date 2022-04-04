@@ -37,8 +37,8 @@ do
 done
 
 # Update
-sudo apt update
-sudo apt upgrade
+# sudo apt update
+# sudo apt upgrade
 
 # Cleaning
 sudo apt autoremove
