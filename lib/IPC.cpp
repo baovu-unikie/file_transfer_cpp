@@ -47,14 +47,30 @@ void IPC::open_file()
 		this->fs.open(opts.file_name, std::fstream::out | std::fstream::trunc | std::fstream::binary);
 
 	if (this->fs.fail()) // Check logical error on I/O operation (close/open)
+	{
+		cleanup();
 		throw std::runtime_error("ERROR: " + this->opts.file_name + ": " + strerror(errno));
+	}
 }
 
 void IPC::write_to_file(std::vector<char> &data, std::streamsize &data_size)
 {
 	this->fs.write(data.data(), data_size);
 	if (this->fs.bad()) // check read/writing error on i/o operation
+	{
+		this->cleanup();
 		throw std::runtime_error("ERROR: ostream::write().");
+	}
+}
+
+void IPC::read_file(std::vector<char> &data, std::streamsize &data_size)
+{
+	this->fs.read(data.data(), data_size);
+	if (this->fs.bad()) // check read/writing error on i/o operation
+	{
+		this->cleanup();
+		throw std::runtime_error("ERROR: istream::read().");
+	}
 }
 
 

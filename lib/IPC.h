@@ -100,6 +100,7 @@ class IPC
 		void auto_start();
 		void open_file();
 		void write_to_file(std::vector<char> &data, std::streamsize &data_size);
+		void read_file(std::vector<char>&data, std::streamsize &data_size);
 };
 
 class IPCMsgQSend : public IPC
@@ -129,8 +130,8 @@ class IPCMsgQReceive : public IPCMsgQSend
 		explicit IPCMsgQReceive(ipc_options_t &options) : IPCMsgQSend(options)
 		{};
 		// Methods
-		void init() final;
-		void receive() final;
+		void init() override;
+		void receive() override;
 };
 
 class IPCPipeSend : public IPC
