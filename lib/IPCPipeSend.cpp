@@ -37,14 +37,14 @@ void IPCPipeSend::init()
 	// create a fifo
 	if (mkfifo(this->opts.server_name.c_str(), 0660) != 0)
 	{
-		cleanup();
+		this->cleanup();
 		throw std::runtime_error("ERROR: " + this->opts.server_name + ": " + strerror(errno));
 	}
 	// open the pipe with O_NONBLOCK to get EAGAIN
 	this->pd = open(this->opts.server_name.c_str(), O_RDWR | O_NONBLOCK);
 	if (this->pd == -1)
 	{
-		cleanup();
+		this->cleanup();
 		throw std::runtime_error("ERROR: " + this->opts.server_name + ": " + strerror(errno));
 	}
 	else
@@ -107,14 +107,14 @@ void IPCPipeSend::send()
 				std::cout << std::endl;
 				if (errno == EAGAIN && this->timer.get_duration() >= this->timeout)
 				{
-					cleanup();
+					this->cleanup();
 					throw std::runtime_error(
 						"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
 				}
 			}
 			else
 			{
-				cleanup();
+				this->cleanup();
 				throw std::runtime_error(static_cast<std::string>("ERROR: write():") + strerror(errno));
 			}
 		}
@@ -126,7 +126,7 @@ void IPCPipeSend::send()
 	}
 	else
 	{
-		cleanup();
+		this->cleanup();
 		throw std::runtime_error("ERROR: Uncompleted transfer");
 	}
 }
