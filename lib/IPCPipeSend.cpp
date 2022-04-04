@@ -58,7 +58,7 @@ void IPCPipeSend::init()
 		this->cleanup();
 		throw std::runtime_error("ERROR: File size = 0.");
 	}
-	this->buffer = new char[this->p_msgsize];
+	this->buffer.resize(this->p_msgsize);
 }
 
 void IPCPipeSend::print_members() const
@@ -74,7 +74,7 @@ void IPCPipeSend::send()
 	std::cout << "Sending..." << std::endl;
 	while (!(this->fs.eof()))
 	{
-		this->fs.read(this->buffer, this->p_msgsize);
+		this->fs.read(this->buffer.data(), this->p_msgsize);
 		if (this->fs.bad()) // check read/writing error on i/o operation
 			throw std::runtime_error("ERROR: istream::read().");
 
@@ -82,7 +82,7 @@ void IPCPipeSend::send()
 		if (this->ipc_info.read_bytes >= 0)
 		{
 			errno = 0; // clear errno
-			this->ipc_info.sent_bytes = write(this->pd, this->buffer, this->ipc_info.read_bytes);
+			this->ipc_info.sent_bytes = write(this->pd, this->buffer.data(), this->ipc_info.read_bytes);
 			if (this->ipc_info.sent_bytes == this->ipc_info.read_bytes && this->ipc_info.sent_bytes != 0)
 			{
 				this->ipc_info.total_sent_bytes += this->ipc_info.sent_bytes;
@@ -96,7 +96,7 @@ void IPCPipeSend::send()
 					std::cout << "." << std::flush;
 					this->timer.update_end();
 					errno = 0;
-					this->ipc_info.sent_bytes = write(this->pd, this->buffer, this->ipc_info.read_bytes);
+					this->ipc_info.sent_bytes = write(this->pd, this->buffer.data(), this->ipc_info.read_bytes);
 					if (this->ipc_info.sent_bytes == this->ipc_info.read_bytes)
 					{
 						this->ipc_info.total_sent_bytes += this->ipc_info.sent_bytes;

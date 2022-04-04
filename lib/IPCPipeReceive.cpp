@@ -25,7 +25,7 @@ void IPCPipeReceive::init()
 	}
 
 	this->open_file();
-	this->buffer = new char[this->p_msgsize];
+	this->buffer.resize(this->p_msgsize);
 	this->timer.update_all(); // reset timer
 }
 
@@ -36,7 +36,7 @@ void IPCPipeReceive::receive()
 	while (errno != EOF && this->timer.get_duration() < this->timeout)
 	{
 		errno = 0; // clear errno
-		this->ipc_info.read_bytes = read(pd, buffer, this->p_msgsize);
+		this->ipc_info.read_bytes = read(this->pd, this->buffer.data(), this->p_msgsize);
 		if (this->ipc_info.read_bytes > 0)
 		{
 			this->write_to_file(this->buffer, this->ipc_info.read_bytes);

@@ -148,7 +148,7 @@ void ipc_start(ipc_options_t &options)
 		}
 		else if (options.protocol == IPCProtocol::PIPE)
 		{
-			IPCPipeReceive pipe{*options};
+			IPCPipeReceive pipe{options};
 			pipe.print_members();
 			pipe.auto_start();
 		}
@@ -167,7 +167,7 @@ void ipc_start(ipc_options_t &options)
 		}
 		else if (options.protocol == IPCProtocol::PIPE)
 		{
-			IPCPipeSend pipe{*options};
+			IPCPipeSend pipe{options};
 			pipe.print_members();
 			pipe.auto_start();
 		}
