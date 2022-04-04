@@ -39,7 +39,7 @@ void IPCMsgQSend::init()
 
 	if (this->mqd == -1)
 	{
-		cleanup();
+		this->cleanup();
 		throw std::runtime_error("ERROR: " + this->opts.server_name + ": " + strerror(errno));
 	}
 	else
@@ -74,11 +74,9 @@ void IPCMsgQSend::send()
 	std::cout << "Sending..." << std::endl;
 	while (!this->fs.eof())
 	{
-		this->fs.read(buffer.data(), this->attr.mq_msgsize);
-		if (this->fs.bad()) // check read/writing error on i/o operation
-			throw std::runtime_error("ERROR: istream::read().");
-
+		this->read_file(buffer, this->attr.mq_msgsize);
 		this->ipc_info.read_bytes = this->fs.gcount();
+
 		if (this->ipc_info.read_bytes > 0)
 		{
 			errno = 0; // clear errno
@@ -109,14 +107,14 @@ void IPCMsgQSend::send()
 				std::cout << std::endl;
 				if (errno == EAGAIN && this->timer.get_duration() >= this->timeout)
 				{
-					cleanup();
+					this->cleanup();
 					throw std::runtime_error(
 						"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
 				}
 			}
 			else
 			{
-				cleanup();
+				this->cleanup();
 				throw std::runtime_error(static_cast<std::string>("ERROR: mq_send(): ") + strerror(errno));
 			}
 		}
@@ -148,7 +146,7 @@ void IPCMsgQSend::send()
 
 		if (is_empty != 0)
 		{
-			cleanup();
+			this->cleanup();
 			throw std::runtime_error(
 				"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
 		}
@@ -158,7 +156,7 @@ void IPCMsgQSend::send()
 	}
 	else
 	{
-		cleanup();
+		this->cleanup();
 		throw std::runtime_error("ERROR: Connection lost. The transfer is interrupted.");
 	}
 }
