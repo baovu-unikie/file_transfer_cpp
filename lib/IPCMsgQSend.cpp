@@ -52,7 +52,7 @@ void IPCMsgQSend::init()
 		this->cleanup();
 		throw std::runtime_error("ERROR: File size = 0.");
 	}
-	this->buffer = new char[this->attr.mq_msgsize];
+	this->buffer.resize(this->attr.mq_msgsize);
 	this->timer.update_all();
 }
 
@@ -74,7 +74,7 @@ void IPCMsgQSend::send()
 	std::cout << "Sending..." << std::endl;
 	while (!this->fs.eof())
 	{
-		this->fs.read(this->buffer, this->attr.mq_msgsize);
+		this->fs.read(buffer.data(), this->attr.mq_msgsize);
 		if (this->fs.bad()) // check read/writing error on i/o operation
 			throw std::runtime_error("ERROR: istream::read().");
 
@@ -82,7 +82,7 @@ void IPCMsgQSend::send()
 		if (this->ipc_info.read_bytes > 0)
 		{
 			errno = 0; // clear errno
-			mq_send_return_value = mq_send(this->mqd, this->buffer, this->ipc_info.read_bytes, this->mq_priority);
+			mq_send_return_value = mq_send(this->mqd, this->buffer.data(), this->ipc_info.read_bytes, this->mq_priority);
 			if (mq_send_return_value == 0)
 			{
 				this->ipc_info.total_sent_bytes += this->ipc_info.read_bytes;
@@ -96,7 +96,7 @@ void IPCMsgQSend::send()
 					print_wait_msg("The message queue is full. Waiting for client to empty the queue");
 					this->timer.update_end();
 					errno = 0; // clear errno
-					mq_send_return_value = mq_send(this->mqd, this->buffer, this->ipc_info.read_bytes,
+					mq_send_return_value = mq_send(this->mqd, this->buffer.data(), this->ipc_info.read_bytes,
 												   this->mq_priority);
 					if (mq_send_return_value == 0)
 					{

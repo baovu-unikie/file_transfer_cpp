@@ -16,11 +16,6 @@ unsigned long IPC::get_file_size() const
 
 void IPC::cleanup()
 {
-	if (this->buffer != nullptr)
-	{
-		delete buffer;
-		std::cout << "Freed the buffer." << std::endl;
-	}
 	std::cout << "Closed file." << std::endl;
 	fs.close();
 }
@@ -33,10 +28,6 @@ void IPC::print_members() const
 			  << "file_name: " << opts.file_name << "\n"
 			  << "mem_size: " << opts.mem_size << "\n"
 			  << "timeout: " << timeout << "\n";
-	if (this->buffer == nullptr)
-		std::cout << "buffer: nullptr" << std::endl;
-	else
-		std::cout << "buffer: " << buffer << std::endl;
 }
 
 void IPC::auto_start()
@@ -59,9 +50,9 @@ void IPC::open_file()
 		throw std::runtime_error("ERROR: " + this->opts.file_name + ": " + strerror(errno));
 }
 
-void IPC::write_to_file(char *data, std::streamsize &data_size)
+void IPC::write_to_file(std::vector<char> &data, std::streamsize &data_size)
 {
-	this->fs.write(data, data_size);
+	this->fs.write(data.data(), data_size);
 	if (this->fs.bad()) // check read/writing error on i/o operation
 		throw std::runtime_error("ERROR: ostream::write().");
 }
@@ -141,46 +132,46 @@ ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[])
 		}
 	}
 
-	ipc_validate_options(options);
+	ipc_validate_options(*options);
 	return options;
 }
 
-void ipc_start(ipc_options_t *options)
+void ipc_start(ipc_options_t &options)
 {
-	if (options->mode == IPCMode::RECEIVE_MODE)
+	if (options.mode == IPCMode::RECEIVE_MODE)
 	{
-		if (options->protocol == IPCProtocol::MSG_QUEUE)
+		if (options.protocol == IPCProtocol::MSG_QUEUE)
 		{
-			IPCMsgQReceive mq{*options};
+			IPCMsgQReceive mq{options};
 			mq.print_members();
 			mq.auto_start();
 		}
-		else if (options->protocol == IPCProtocol::PIPE)
+		else if (options.protocol == IPCProtocol::PIPE)
 		{
 			IPCPipeReceive pipe{*options};
 			pipe.print_members();
 			pipe.auto_start();
 		}
-		else if (options->protocol == IPCProtocol::SHARED_MEM)
+		else if (options.protocol == IPCProtocol::SHARED_MEM)
 		{
 			std::cout << "SHARD_MEM: Not implemented yet." << std::endl;
 		}
 	}
-	else if (options->mode == IPCMode::SEND_MODE)
+	else if (options.mode == IPCMode::SEND_MODE)
 	{
-		if (options->protocol == IPCProtocol::MSG_QUEUE)
+		if (options.protocol == IPCProtocol::MSG_QUEUE)
 		{
-			IPCMsgQSend mq{*options};
+			IPCMsgQSend mq{options};
 			mq.print_members();
 			mq.auto_start();
 		}
-		else if (options->protocol == IPCProtocol::PIPE)
+		else if (options.protocol == IPCProtocol::PIPE)
 		{
 			IPCPipeSend pipe{*options};
 			pipe.print_members();
 			pipe.auto_start();
 		}
-		else if (options->protocol == IPCProtocol::SHARED_MEM)
+		else if (options.protocol == IPCProtocol::SHARED_MEM)
 		{
 			std::cout << "SHARD_MEM: Not implemented yet." << std::endl;
 		}
@@ -235,18 +226,19 @@ void ipc_usage(IPCMode mode, bool is_exit)
 
 }
 
-void ipc_validate_options(ipc_options_t *options)
+void ipc_validate_options(ipc_options_t &options)
 {
 	bool is_valid{true};
-	if (options->protocol == IPCProtocol::MSG_QUEUE || options->protocol == IPCProtocol::SHARED_MEM)
+	if (options.protocol == IPCProtocol::MSG_QUEUE || options.protocol == IPCProtocol::SHARED_MEM)
 	{
-		if (options->server_name.at(0) != '/' || options->server_name.size() == 1)
+		if (options.server_name.at(0) != '/' || options.server_name.size() == 1)
 		{
 			std::cout << "ERROR: Invalid server name. " << std::endl;
 			is_valid = false;
 		}
 
-		if (options->protocol == IPCProtocol::SHARED_MEM && (options->mem_size == 0 || options->mem_size > SHARED_MEM_LIMIT_IN_KB))
+		if (options.protocol == IPCProtocol::SHARED_MEM &&
+			(options.mem_size == 0 || options.mem_size > SHARED_MEM_LIMIT_IN_KB))
 		{
 			std::cout << "ERROR: Invalid memory size. It should be in range [1,"
 					  << SHARED_MEM_LIMIT_IN_KB << "]." << std::endl;
@@ -255,7 +247,7 @@ void ipc_validate_options(ipc_options_t *options)
 	}
 
 	if (!is_valid)
-		ipc_usage(options->mode, true);
+		ipc_usage(options.mode, true);
 }
 
 void print_wait_msg(const std::string &msg)
