@@ -63,9 +63,9 @@ typedef struct ipc_shm_header_t
 } ipc_shm_header_t;
 
 ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[]);
-void ipc_start(ipc_options_t *options);
+void ipc_start(ipc_options_t &options);
 void ipc_usage(IPCMode mode, bool is_exit);
-void ipc_validate_options(ipc_options_t *options);
+void ipc_validate_options(ipc_options_t &options);
 void print_wait_msg(const std::string &msg);
 
 class IPC
@@ -74,7 +74,7 @@ class IPC
 		std::fstream fs{};
 		ipc_options_t opts{};
 		long timeout{10};
-		char *buffer{nullptr};
+		std::vector<char> buffer{};
 		ChronoTime timer;
 		ipc_info_t ipc_info{};
 
@@ -86,11 +86,6 @@ class IPC
 		// Virtual destructor
 		virtual  ~IPC()
 		{
-			if (this->buffer != nullptr)
-			{
-				delete buffer;
-				std::cout << "Freed the buffer." << std::endl;
-			}
 			fs.close();
 			std::cout << "Closed file." << std::endl;
 		};
@@ -104,7 +99,7 @@ class IPC
 		virtual void send(){};
 		void auto_start();
 		void open_file();
-		void write_to_file(char *data, std::streamsize &data_size);
+		void write_to_file(std::vector<char> &data, std::streamsize &data_size);
 };
 
 class IPCMsgQSend : public IPC

@@ -30,7 +30,7 @@ void IPCMsgQReceive::init()
 
 	this->open_file();
 	this->timer.update_all();
-	this->buffer = new char[this->attr.mq_msgsize];
+	this->buffer.resize(this->attr.mq_msgsize);
 }
 
 void IPCMsgQReceive::receive()
@@ -40,7 +40,7 @@ void IPCMsgQReceive::receive()
 	while (errno != EAGAIN || ((errno == EAGAIN) && (this->timer.get_duration() < this->timeout)))
 	{
 		errno = 0; // clear error number
-		this->ipc_info.read_bytes = mq_receive(this->mqd, buffer, this->attr.mq_msgsize, nullptr);
+		this->ipc_info.read_bytes = mq_receive(this->mqd, this->buffer.data(), this->attr.mq_msgsize, nullptr);
 		if (this->ipc_info.read_bytes > 0)
 		{
 			std::cout << "\r" << std::flush;
