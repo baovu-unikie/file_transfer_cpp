@@ -33,7 +33,7 @@ void IPCMsgQReceive::init()
 	this->buffer.resize(this->attr.mq_msgsize);
 }
 
-void IPCMsgQReceive::receive()
+void IPCMsgQReceive::transfer()
 {
 	std::cout << "Waiting for new message..." << std::endl;
 	errno = 0; // clear error number
@@ -43,9 +43,7 @@ void IPCMsgQReceive::receive()
 		this->ipc_info.read_bytes = mq_receive(this->mqd, this->buffer.data(), this->attr.mq_msgsize, nullptr);
 		if (this->ipc_info.read_bytes > 0)
 		{
-			std::cout << "\r" << std::flush;
-			std::cout << "Received " << ++(this->ipc_info.number_of_msg) << " messages." << std::flush;
-			this->write_to_file(buffer, this->ipc_info.read_bytes);
+			this->write_to_file(this->buffer, this->ipc_info.read_bytes);
 			this->timer.update_begin();
 		}
 		this->timer.update_end();

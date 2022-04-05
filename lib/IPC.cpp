@@ -33,10 +33,7 @@ void IPC::print_members() const
 void IPC::auto_start()
 {
 	this->init();
-	if (this->opts.mode == IPCMode::SEND_MODE)
-		this->send();
-	if (this->opts.mode == IPCMode::RECEIVE_MODE)
-		this->receive();
+	this->transfer();
 }
 
 void IPC::open_file()
@@ -53,7 +50,7 @@ void IPC::open_file()
 	}
 }
 
-void IPC::write_to_file(std::vector<char> &data, std::streamsize &data_size)
+void IPC::write_to_file (const std::vector<char> &data, const std::streamsize &data_size)
 {
 	this->fs.write(data.data(), data_size);
 	if (this->fs.bad()) // check read/writing error on i/o operation

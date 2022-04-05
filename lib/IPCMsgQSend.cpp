@@ -67,7 +67,7 @@ void IPCMsgQSend::print_members() const
 			  << "mq_priority: " << this->mq_priority << std::endl;
 }
 
-void IPCMsgQSend::send()
+void IPCMsgQSend::transfer()
 {
 	long mq_send_return_value{0};
 
