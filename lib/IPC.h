@@ -32,25 +32,25 @@ enum class IPCMode
 	SEND_MODE, RECEIVE_MODE
 };
 
-typedef struct ipc_options_t
+struct ipc_options_t
 {
 	IPCMode mode{};
 	IPCProtocol protocol{IPCProtocol::NONE};
 	std::string server_name{};
 	std::string file_name{};
 	size_t mem_size{0};
-} ipc_options_t;
+};
 
-typedef struct ipc_info_t
+struct ipc_info_t
 {
 	long number_of_msg{};
 	long read_bytes{};
 	long sent_bytes{};
 	unsigned long file_size{};
 	unsigned long total_sent_bytes{};
-} ipc_info_t;
+};
 
-typedef struct ipc_shm_header_t
+struct ipc_shm_header_t
 {
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
@@ -60,9 +60,9 @@ typedef struct ipc_shm_header_t
 	volatile bool is_init;
 	volatile bool is_read;
 	char data_ap[0]; // data access point - must always be the last member of the struct
-} ipc_shm_header_t;
+};
 
-ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[]);
+ipc_options_t ipc_get_options(IPCMode mode, int argc, char *argv[]);
 void ipc_start(ipc_options_t &options);
 void ipc_usage(IPCMode mode, bool is_exit);
 void ipc_validate_options(ipc_options_t &options);
@@ -92,15 +92,17 @@ class IPC
 
 		// Methods
 		unsigned long get_file_size() const;
-		virtual void cleanup();
-		virtual void init(){};
+
+		virtual void init()
+		{};
 		virtual void print_members() const;
-		virtual void receive(){};
-		virtual void send(){};
+
+		virtual void transfer()
+		{};
 		void auto_start();
 		void open_file();
-		void write_to_file(std::vector<char> &data, std::streamsize &data_size);
-		void read_file(std::vector<char>&data, std::streamsize &data_size);
+		void write_to_file(const std::vector<char> &data, const std::streamsize &data_size);
+		void read_file(std::vector<char> &data, std::streamsize &data_size);
 };
 
 class IPCMsgQSend : public IPC
@@ -114,12 +116,11 @@ class IPCMsgQSend : public IPC
 		// Constructor
 		explicit IPCMsgQSend(ipc_options_t options) : IPC(options)
 		{};
-		~IPCMsgQSend() override;
+		virtual ~IPCMsgQSend() override;
 		// Methods
-		void cleanup() override;
-		void init() override;
+		virtual void init() override;
 		void print_members() const override;
-		void send() override;
+		virtual void transfer() override;
 
 };
 
@@ -131,7 +132,7 @@ class IPCMsgQReceive : public IPCMsgQSend
 		{};
 		// Methods
 		void init() override;
-		void receive() override;
+		void transfer() override;
 };
 
 #endif //FILE_TRANSFER_CPP_IPC_H
