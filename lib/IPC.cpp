@@ -75,13 +75,13 @@ void IPC::read_file(std::vector<char> &data, std::streamsize &data_size)
 /* Non-member function definitions ********************************************/
 /******************************************************************************/
 
-ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[])
+ipc_options_t ipc_get_options(IPCMode mode, int argc, char *argv[])
 {
-	auto *options = new ipc_options_t;
+	ipc_options_t options{};
 	std::vector<std::string> arg_list{};
 	size_t arg_list_size{0};
 
-	options->mode = mode;
+	options.mode = mode;
 
 	for (int i{1}; i < argc; i++)
 	{
@@ -96,7 +96,7 @@ ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[])
 
 	for (size_t i{0}; i < arg_list_size; i++)
 	{
-		if ((arg_list.at(i) == "--help" || arg_list.at(i) == "-h") && options->protocol == IPCProtocol::NONE)
+		if ((arg_list.at(i) == "--help" || arg_list.at(i) == "-h") && options.protocol == IPCProtocol::NONE)
 		{
 			ipc_usage(mode, false);
 			exit(EXIT_SUCCESS);
@@ -106,33 +106,33 @@ ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[])
 			ipc_usage(mode, true);
 		}
 			/* options with one argument */
-		else if ((arg_list.at(i) == "--queue" || arg_list.at(i) == "-q") && options->protocol == IPCProtocol::NONE)
+		else if ((arg_list.at(i) == "--queue" || arg_list.at(i) == "-q") && options.protocol == IPCProtocol::NONE)
 		{
-			options->protocol = IPCProtocol::MSG_QUEUE;
-			options->server_name = arg_list.at(++i);
+			options.protocol = IPCProtocol::MSG_QUEUE;
+			options.server_name = arg_list.at(++i);
 		}
-		else if ((arg_list.at(i) == "--pipe" || arg_list.at(i) == "-p") && options->protocol == IPCProtocol::NONE)
+		else if ((arg_list.at(i) == "--pipe" || arg_list.at(i) == "-p") && options.protocol == IPCProtocol::NONE)
 		{
-			options->protocol = IPCProtocol::PIPE;
-			options->server_name = arg_list.at(++i);
+			options.protocol = IPCProtocol::PIPE;
+			options.server_name = arg_list.at(++i);
 		}
 
 		else if (arg_list.at(i) == "--file" || arg_list.at(i) == "-f")
 		{
-			options->file_name = arg_list.at(++i);
+			options.file_name = arg_list.at(++i);
 		}
 			/* options with two arguments */
 		else if (i + 2 == arg_list_size)
 		{
 			ipc_usage(mode, true);
 		}
-		else if ((arg_list.at(i) == "--shm" || arg_list.at(i) == "-s") && options->protocol == IPCProtocol::NONE)
+		else if ((arg_list.at(i) == "--shm" || arg_list.at(i) == "-s") && options.protocol == IPCProtocol::NONE)
 		{
-			options->protocol = IPCProtocol::SHARED_MEM;
-			options->server_name = arg_list.at(++i);
+			options.protocol = IPCProtocol::SHARED_MEM;
+			options.server_name = arg_list.at(++i);
 			try
 			{
-				options->mem_size = stoi(arg_list.at(++i));
+				options.mem_size = stoi(arg_list.at(++i));
 			} catch (const std::invalid_argument &ia)
 			{
 				std::cout << "ERROR: Invalid argument. Memory size should be an integer." << std::endl;
@@ -145,7 +145,7 @@ ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[])
 		}
 	}
 
-	ipc_validate_options(*options);
+	ipc_validate_options(options);
 	return options;
 }
 

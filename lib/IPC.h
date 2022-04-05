@@ -62,7 +62,7 @@ struct ipc_shm_header_t
 	char data_ap[0]; // data access point - must always be the last member of the struct
 };
 
-ipc_options_t *ipc_get_options(IPCMode mode, int argc, char *argv[]);
+ipc_options_t ipc_get_options(IPCMode mode, int argc, char *argv[]);
 void ipc_start(ipc_options_t &options);
 void ipc_usage(IPCMode mode, bool is_exit);
 void ipc_validate_options(ipc_options_t &options);

@@ -7,8 +7,7 @@
 
 int main(int argc, char *argv[])
 {
-	ipc_options_t *options = ipc_get_options(IPCMode::RECEIVE_MODE, argc, argv);
-	ipc_start(*options);
-	delete options;
+	ipc_options_t options = ipc_get_options(IPCMode::RECEIVE_MODE, argc, argv);
+	ipc_start(options);
 	return 0;
 }
