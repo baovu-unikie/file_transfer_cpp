@@ -9,15 +9,13 @@ void IPCMsgQReceive::init()
 {
 	this->timer.update_all(); // reset timer before use
 
+	std::cout << "Waiting for /dev/mqueue" << std::endl;
 	do
 	{
-		print_wait_msg("Waiting for /dev/mqueue");
 		this->timer.update_end();
 		this->mqd = mq_open(this->opts.server_name.c_str(), O_RDONLY | O_NONBLOCK, 0660, &(this->attr));
 		sleep(1);
 	} while (this->mqd == -1 && (this->timer.get_duration() < this->timeout));
-
-	std::cout << std::endl;
 
 	if (this->mqd == -1)
 	{
@@ -48,5 +46,5 @@ void IPCMsgQReceive::transfer()
 		}
 		this->timer.update_end();
 	}
-	std::cout << "\nThe message queue is closed. Received data: " << this->get_file_size() << " byte(s)" << std::endl;
+	std::cout << "The message queue is closed. Received data: " << this->get_file_size() << " byte(s)" << std::endl;
 }

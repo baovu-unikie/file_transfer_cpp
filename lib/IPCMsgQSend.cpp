@@ -91,7 +91,6 @@ void IPCMsgQSend::transfer()
 			{
 				while (errno == EAGAIN && this->timer.get_duration() < this->timeout)
 				{
-					print_wait_msg("The message queue is full. Waiting for client to empty the queue");
 					this->timer.update_end();
 					errno = 0; // clear errno
 					mq_send_return_value = mq_send(this->mqd, this->buffer.data(), this->ipc_info.read_bytes,
@@ -102,9 +101,7 @@ void IPCMsgQSend::transfer()
 						++(this->ipc_info.number_of_msg);
 						this->timer.update_all();
 					}
-					sleep(1);
 				}
-				std::cout << std::endl;
 				if (errno == EAGAIN && this->timer.get_duration() >= this->timeout)
 				{
 					this->cleanup();
