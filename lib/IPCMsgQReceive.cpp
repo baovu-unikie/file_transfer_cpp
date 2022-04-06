@@ -9,22 +9,17 @@ void IPCMsgQReceive::init()
 {
 	this->timer.update_all(); // reset timer before use
 
+	std::cout << "Waiting for /dev/mqueue" << std::endl;
 	do
 	{
-		print_wait_msg("Waiting for /dev/mqueue");
 		this->timer.update_end();
 		this->mqd = mq_open(this->opts.server_name.c_str(), O_RDONLY | O_NONBLOCK, 0660, &(this->attr));
 		sleep(1);
 	} while (this->mqd == -1 && (this->timer.get_duration() < this->timeout));
 
-	std::cout << std::endl;
-
 	if (this->mqd == -1)
-	{
-		this->cleanup();
 		throw std::runtime_error(
 			"ERROR: Timeout. Waited for the sender more than " + std::to_string(this->timeout) + " seconds.");
-	}
 	else
 		std::cout << "/dev/mqueue" << this->opts.server_name << " is opened." << std::endl;
 
@@ -33,7 +28,7 @@ void IPCMsgQReceive::init()
 	this->buffer.resize(this->attr.mq_msgsize);
 }
 
-void IPCMsgQReceive::receive()
+void IPCMsgQReceive::transfer()
 {
 	std::cout << "Waiting for new message..." << std::endl;
 	errno = 0; // clear error number
@@ -43,12 +38,10 @@ void IPCMsgQReceive::receive()
 		this->ipc_info.read_bytes = mq_receive(this->mqd, this->buffer.data(), this->attr.mq_msgsize, nullptr);
 		if (this->ipc_info.read_bytes > 0)
 		{
-			std::cout << "\r" << std::flush;
-			std::cout << "Received " << ++(this->ipc_info.number_of_msg) << " messages." << std::flush;
-			this->write_to_file(buffer, this->ipc_info.read_bytes);
+			this->write_to_file(this->buffer, this->ipc_info.read_bytes);
 			this->timer.update_begin();
 		}
 		this->timer.update_end();
 	}
-	std::cout << "\nThe message queue is closed. Received data: " << this->get_file_size() << " byte(s)" << std::endl;
+	std::cout << "The message queue is closed. Received data: " << this->get_file_size() << " byte(s)" << std::endl;
 }

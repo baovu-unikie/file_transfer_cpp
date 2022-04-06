@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Update
+# sudo apt update
+# sudo apt upgrade
+
 # Functions
 install_bazel () {
 	curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
@@ -35,10 +39,6 @@ do
 		install_$each
 	fi
 done
-
-# Update
-# sudo apt update
-# sudo apt upgrade
 
 # Cleaning
 sudo apt autoremove

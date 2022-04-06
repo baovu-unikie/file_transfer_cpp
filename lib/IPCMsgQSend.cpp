@@ -17,19 +17,6 @@ IPCMsgQSend::~IPCMsgQSend()
 	std::cout << "Unlinked the message queue name." << std::endl;
 }
 
-void IPCMsgQSend::cleanup()
-{
-	if (this->mqd > 0)
-	{
-		mq_close(this->mqd);
-		std::cout << "Closed the message queue." << std::endl;
-	}
-
-	mq_unlink(this->opts.server_name.c_str());
-	std::cout << "Unlinked the message queue name." << std::endl;
-	IPC::cleanup();
-}
-
 void IPCMsgQSend::init()
 {
 	// remove old queue name (if any)
@@ -38,20 +25,14 @@ void IPCMsgQSend::init()
 	this->mqd = mq_open(this->opts.server_name.c_str(), O_CREAT | O_EXCL | O_WRONLY | O_NONBLOCK, 0660, &(this->attr));
 
 	if (this->mqd == -1)
-	{
-		this->cleanup();
 		throw std::runtime_error("ERROR: " + this->opts.server_name + ": " + strerror(errno));
-	}
 	else
 		std::cout << "/dev/mqueue" << this->opts.server_name << " is opened." << std::endl;
 
 	this->open_file();
 	this->ipc_info.file_size = this->get_file_size();
-	if(this->ipc_info.file_size == 0)
-	{
-		this->cleanup();
+	if (this->ipc_info.file_size == 0)
 		throw std::runtime_error("ERROR: File size = 0.");
-	}
 	this->buffer.resize(this->attr.mq_msgsize);
 	this->timer.update_all();
 }
@@ -67,7 +48,7 @@ void IPCMsgQSend::print_members() const
 			  << "mq_priority: " << this->mq_priority << std::endl;
 }
 
-void IPCMsgQSend::send()
+void IPCMsgQSend::transfer()
 {
 	long mq_send_return_value{0};
 
@@ -80,7 +61,8 @@ void IPCMsgQSend::send()
 		if (this->ipc_info.read_bytes > 0)
 		{
 			errno = 0; // clear errno
-			mq_send_return_value = mq_send(this->mqd, this->buffer.data(), this->ipc_info.read_bytes, this->mq_priority);
+			mq_send_return_value = mq_send(this->mqd, this->buffer.data(), this->ipc_info.read_bytes,
+										   this->mq_priority);
 			if (mq_send_return_value == 0)
 			{
 				this->ipc_info.total_sent_bytes += this->ipc_info.read_bytes;
@@ -91,7 +73,6 @@ void IPCMsgQSend::send()
 			{
 				while (errno == EAGAIN && this->timer.get_duration() < this->timeout)
 				{
-					print_wait_msg("The message queue is full. Waiting for client to empty the queue");
 					this->timer.update_end();
 					errno = 0; // clear errno
 					mq_send_return_value = mq_send(this->mqd, this->buffer.data(), this->ipc_info.read_bytes,
@@ -102,21 +83,13 @@ void IPCMsgQSend::send()
 						++(this->ipc_info.number_of_msg);
 						this->timer.update_all();
 					}
-					sleep(1);
 				}
-				std::cout << std::endl;
 				if (errno == EAGAIN && this->timer.get_duration() >= this->timeout)
-				{
-					this->cleanup();
 					throw std::runtime_error(
 						"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
-				}
 			}
 			else
-			{
-				this->cleanup();
-				throw std::runtime_error(static_cast<std::string>("ERROR: mq_send(): ") + strerror(errno));
-			}
+				throw std::runtime_error(std::string("ERROR: mq_send(): ") + strerror(errno));
 		}
 	}
 
@@ -145,18 +118,13 @@ void IPCMsgQSend::send()
 		std::cout << std::endl;
 
 		if (is_empty != 0)
-		{
-			this->cleanup();
 			throw std::runtime_error(
 				"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
-		}
-
 		else
 			std::cout << "Client picked it up." << std::endl;
 	}
 	else
 	{
-		this->cleanup();
 		throw std::runtime_error("ERROR: Connection lost. The transfer is interrupted.");
 	}
 }
