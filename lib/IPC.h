@@ -146,10 +146,9 @@ class IPCPipeSend : public IPC
 		{};
 		~IPCPipeSend() override;
 		// Methods
-		void cleanup() override;
 		void init();
 		void print_members() const override;
-		void send();
+		void transfer();
 
 };
 
@@ -161,7 +160,7 @@ class IPCPipeReceive : public IPCPipeSend
 		{};
 		// Methods
 		void init();
-		void receive();
+		void transfer();
 };
 
 #endif //FILE_TRANSFER_CPP_IPC_H
