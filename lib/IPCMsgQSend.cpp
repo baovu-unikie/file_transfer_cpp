@@ -25,18 +25,14 @@ void IPCMsgQSend::init()
 	this->mqd = mq_open(this->opts.server_name.c_str(), O_CREAT | O_EXCL | O_WRONLY | O_NONBLOCK, 0660, &(this->attr));
 
 	if (this->mqd == -1)
-	{
 		throw std::runtime_error("ERROR: " + this->opts.server_name + ": " + strerror(errno));
-	}
 	else
 		std::cout << "/dev/mqueue" << this->opts.server_name << " is opened." << std::endl;
 
 	this->open_file();
 	this->ipc_info.file_size = this->get_file_size();
 	if (this->ipc_info.file_size == 0)
-	{
 		throw std::runtime_error("ERROR: File size = 0.");
-	}
 	this->buffer.resize(this->attr.mq_msgsize);
 	this->timer.update_all();
 }
@@ -89,15 +85,11 @@ void IPCMsgQSend::transfer()
 					}
 				}
 				if (errno == EAGAIN && this->timer.get_duration() >= this->timeout)
-				{
 					throw std::runtime_error(
 						"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
-				}
 			}
 			else
-			{
 				throw std::runtime_error(std::string("ERROR: mq_send(): ") + strerror(errno));
-			}
 		}
 	}
 
@@ -126,11 +118,8 @@ void IPCMsgQSend::transfer()
 		std::cout << std::endl;
 
 		if (is_empty != 0)
-		{
 			throw std::runtime_error(
 				"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
-		}
-
 		else
 			std::cout << "Client picked it up." << std::endl;
 	}

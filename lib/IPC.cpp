@@ -43,7 +43,7 @@ void IPC::open_file()
 	}
 }
 
-void IPC::write_to_file (const std::vector<char> &data, const std::streamsize &data_size)
+void IPC::write_to_file(const std::vector<char> &data, const std::streamsize &data_size)
 {
 	this->fs.write(data.data(), data_size);
 	if (this->fs.bad()) // check read/writing error on i/o operation

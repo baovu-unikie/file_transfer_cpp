@@ -18,10 +18,8 @@ void IPCMsgQReceive::init()
 	} while (this->mqd == -1 && (this->timer.get_duration() < this->timeout));
 
 	if (this->mqd == -1)
-	{
 		throw std::runtime_error(
 			"ERROR: Timeout. Waited for the sender more than " + std::to_string(this->timeout) + " seconds.");
-	}
 	else
 		std::cout << "/dev/mqueue" << this->opts.server_name << " is opened." << std::endl;
 

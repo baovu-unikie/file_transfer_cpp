@@ -92,13 +92,17 @@ class IPC
 
 		// Methods
 		unsigned long get_file_size() const;
-		virtual void init(){};
+
+		virtual void init()
+		{};
 		virtual void print_members() const;
-		virtual void transfer(){};
+
+		virtual void transfer()
+		{};
 		void auto_start();
 		void open_file();
 		void write_to_file(const std::vector<char> &data, const std::streamsize &data_size);
-		void read_file(std::vector<char>&data, std::streamsize &data_size);
+		void read_file(std::vector<char> &data, std::streamsize &data_size);
 };
 
 class IPCMsgQSend : public IPC
