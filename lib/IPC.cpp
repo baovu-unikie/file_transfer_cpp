@@ -14,12 +14,6 @@ unsigned long IPC::get_file_size() const
 	return boost::filesystem::file_size(this->opts.file_name);
 }
 
-void IPC::cleanup()
-{
-	std::cout << "Closed file." << std::endl;
-	fs.close();
-}
-
 void IPC::print_members() const
 {
 	std::cout << "Mode: " << static_cast<std::underlying_type<IPCMode>::type>(opts.mode) << "\n"
@@ -45,7 +39,6 @@ void IPC::open_file()
 
 	if (this->fs.fail()) // Check logical error on I/O operation (close/open)
 	{
-		cleanup();
 		throw std::runtime_error("ERROR: " + this->opts.file_name + ": " + strerror(errno));
 	}
 }
@@ -55,7 +48,6 @@ void IPC::write_to_file (const std::vector<char> &data, const std::streamsize &d
 	this->fs.write(data.data(), data_size);
 	if (this->fs.bad()) // check read/writing error on i/o operation
 	{
-		this->cleanup();
 		throw std::runtime_error("ERROR: ostream::write().");
 	}
 }
@@ -65,7 +57,6 @@ void IPC::read_file(std::vector<char> &data, std::streamsize &data_size)
 	this->fs.read(data.data(), data_size);
 	if (this->fs.bad()) // check read/writing error on i/o operation
 	{
-		this->cleanup();
 		throw std::runtime_error("ERROR: istream::read().");
 	}
 }

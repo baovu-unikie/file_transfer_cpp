@@ -92,7 +92,6 @@ class IPC
 
 		// Methods
 		unsigned long get_file_size() const;
-		virtual void cleanup();
 		virtual void init(){};
 		virtual void print_members() const;
 		virtual void transfer(){};
@@ -115,7 +114,6 @@ class IPCMsgQSend : public IPC
 		{};
 		virtual ~IPCMsgQSend() override;
 		// Methods
-		void cleanup() override;
 		virtual void init() override;
 		void print_members() const override;
 		virtual void transfer() override;

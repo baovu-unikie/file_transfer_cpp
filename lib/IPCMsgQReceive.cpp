@@ -19,7 +19,6 @@ void IPCMsgQReceive::init()
 
 	if (this->mqd == -1)
 	{
-		this->cleanup();
 		throw std::runtime_error(
 			"ERROR: Timeout. Waited for the sender more than " + std::to_string(this->timeout) + " seconds.");
 	}

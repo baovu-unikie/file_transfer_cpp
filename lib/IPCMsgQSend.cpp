@@ -17,19 +17,6 @@ IPCMsgQSend::~IPCMsgQSend()
 	std::cout << "Unlinked the message queue name." << std::endl;
 }
 
-void IPCMsgQSend::cleanup()
-{
-	if (this->mqd > 0)
-	{
-		mq_close(this->mqd);
-		std::cout << "Closed the message queue." << std::endl;
-	}
-
-	mq_unlink(this->opts.server_name.c_str());
-	std::cout << "Unlinked the message queue name." << std::endl;
-	IPC::cleanup();
-}
-
 void IPCMsgQSend::init()
 {
 	// remove old queue name (if any)
@@ -39,7 +26,6 @@ void IPCMsgQSend::init()
 
 	if (this->mqd == -1)
 	{
-		this->cleanup();
 		throw std::runtime_error("ERROR: " + this->opts.server_name + ": " + strerror(errno));
 	}
 	else
@@ -49,7 +35,6 @@ void IPCMsgQSend::init()
 	this->ipc_info.file_size = this->get_file_size();
 	if (this->ipc_info.file_size == 0)
 	{
-		this->cleanup();
 		throw std::runtime_error("ERROR: File size = 0.");
 	}
 	this->buffer.resize(this->attr.mq_msgsize);
@@ -105,14 +90,12 @@ void IPCMsgQSend::transfer()
 				}
 				if (errno == EAGAIN && this->timer.get_duration() >= this->timeout)
 				{
-					this->cleanup();
 					throw std::runtime_error(
 						"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
 				}
 			}
 			else
 			{
-				this->cleanup();
 				throw std::runtime_error(std::string("ERROR: mq_send(): ") + strerror(errno));
 			}
 		}
@@ -144,7 +127,6 @@ void IPCMsgQSend::transfer()
 
 		if (is_empty != 0)
 		{
-			this->cleanup();
 			throw std::runtime_error(
 				"ERROR: Timeout. Waited for client more than " + std::to_string(this->timeout) + " seconds.");
 		}
@@ -154,7 +136,6 @@ void IPCMsgQSend::transfer()
 	}
 	else
 	{
-		this->cleanup();
 		throw std::runtime_error("ERROR: Connection lost. The transfer is interrupted.");
 	}
 }
