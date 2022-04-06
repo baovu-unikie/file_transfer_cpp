@@ -47,7 +47,7 @@ void IPCMsgQSend::init()
 
 	this->open_file();
 	this->ipc_info.file_size = this->get_file_size();
-	if(this->ipc_info.file_size == 0)
+	if (this->ipc_info.file_size == 0)
 	{
 		this->cleanup();
 		throw std::runtime_error("ERROR: File size = 0.");
@@ -80,7 +80,8 @@ void IPCMsgQSend::transfer()
 		if (this->ipc_info.read_bytes > 0)
 		{
 			errno = 0; // clear errno
-			mq_send_return_value = mq_send(this->mqd, this->buffer.data(), this->ipc_info.read_bytes, this->mq_priority);
+			mq_send_return_value = mq_send(this->mqd, this->buffer.data(), this->ipc_info.read_bytes,
+										   this->mq_priority);
 			if (mq_send_return_value == 0)
 			{
 				this->ipc_info.total_sent_bytes += this->ipc_info.read_bytes;
@@ -112,7 +113,7 @@ void IPCMsgQSend::transfer()
 			else
 			{
 				this->cleanup();
-				throw std::runtime_error(static_cast<std::string>("ERROR: mq_send(): ") + strerror(errno));
+				throw std::runtime_error(std::string("ERROR: mq_send(): ") + strerror(errno));
 			}
 		}
 	}
