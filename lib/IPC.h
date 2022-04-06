@@ -144,11 +144,11 @@ class IPCPipeSend : public IPC
 		// Constructor
 		explicit IPCPipeSend(ipc_options_t options) : IPC(options)
 		{};
-		~IPCPipeSend() override;
+		virtual ~IPCPipeSend() override;
 		// Methods
-		void init();
+		virtual void init() override;
 		void print_members() const override;
-		void transfer();
+		virtual void transfer() override;
 
 };
 
@@ -159,8 +159,8 @@ class IPCPipeReceive : public IPCPipeSend
 		explicit IPCPipeReceive(ipc_options_t options) : IPCPipeSend(options)
 		{};
 		// Methods
-		void init();
-		void transfer();
+		void init() override;
+		void transfer() override;
 };
 
 #endif //FILE_TRANSFER_CPP_IPC_H
