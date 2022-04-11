@@ -1,0 +1,224 @@
+@startuml
+class IPC
+{
+	# ipc_options_t opts{};
+	# ipc_info_t info{};
+	# long timeout{2};
+	# ChronoTime timer;
+	# std::vector<char> buffer{};
+
+	+ explicit IPC(ipc_options_t options) : opts(std::move(options)){};
+	+ virtual void init() = 0;
+	+ virtual void transfer() = 0;
+}
+
+class IPCHandler
+{
+	# ipc_options_t opts{};
+
+	+ void set_options(IPCMode m, std::vector<std::string> argv);
+	+ void usage(bool is_exit) const;
+	+ const ipc_options_t &get_options() const;
+	+ IPCProtocol start() const;
+}
+
+class FileHandler
+{
+	# std::fstream fs{};
+	# std::string file_name{};
+	# FileMode mode {FileMode::NONE};
+
+	+ explicit FileHandler(std::string fn, FileMode m): file_name(std::move(fn)), mode(m){};
+	+ ~FileHandler();
+	+ unsigned long get_file_size();
+	+ void open_file();
+	+ void write_file(const std::vector<char> &data, const std::streamsize &data_size);
+	+ void read_file(std::vector<char> &data, std::streamsize &data_size);
+}
+
+class IPCMsgQSend
+{
+# mqd_t mqd{}
+# struct mq_attr attr{0, 10, 8192, 0}
+# unsigned mq_priority{MQ_PRIO_MAX - 1}
+
+	+ IPCMsgQSend(ipc_options_t options) : IPC(options)
+	+ ~IPCMsgQSend() override
+
+	+ void cleanup() override
+	+ void init()
+	+ void print_members() const override
+	+ void send()
+}
+
+class IPCMsgQReceive
+{
+	# mqd_t mqd{};
+	# mq_attr attr{0, 10, 8192, 0};
+	# unsigned priority{MQ_PRIO_MAX - 1};
+
+	+ explicit IPCMsgQReceive(ipc_options_t options)
+	 	: IPC(options),
+	 	  FileHandler(options.file_name, FileMode::WRITE){};
+	+ ~IPCMsgQReceive();
+	+ void init() override;
+	+ void transfer() override;
+}
+
+class IPCPipeReceive
+{
+	# int pd{0};
+	# std::streamsize  p_msgsize{PIPE_BUF};
+
+	+ explicit IPCPipeReceive(ipc_options_t options)
+	+ : IPC(options),
+	+ FileHandler(options.file_name, FileMode::WRITE) {};
+	+ ~IPCPipeReceive();
+	+ void init() override;
+	+ void transfer() override;
+
+}
+
+class IPCPipeSend
+{
+	# int pd{0};
+	# std::streamsize  p_msgsize{PIPE_BUF};
+
+	+ explicit IPCPipeSend(ipc_options_t options)
+	+ : IPC(options),
+	+ FileHandler(options.file_name, FileMode::READ) {};
+	+ ~IPCPipeSend();
+	+ void init() override;
+	+ void transfer() override;
+}
+
+class IPCShm
+{
+	# int shmd{};
+	# pthread_mutexattr_t mutex_attr{};
+	# pthread_condattr_t cond_attr{};
+	# ipc_shm_header_t *shm_ptr{};
+	# std::streamsize shm_size_in_bytes{};
+	# bool is_end{false};
+
+	+ explicit IPCShm(std::streamsize size) : shm_size_in_bytes(size){};
+	+ ~IPCShm();
+	+ void init_cond();
+	+ void init_mutex();
+	+ void lock_mutex();
+	+ void send_cond_broadcast();
+	+ void set_shm_size() const;
+	+ void unlock_mutex();
+}
+
+class IPCShmReceive
+{
+	# unsigned number_of_tries {10};
+	# size_t last_version{0};
+	+ explicit IPCShmReceive(ipc_options_t options)
+	 : IPC(options),
+	 	FileHandler(options.file_name, FileMode::WRITE),
+	 	IPCShm(options.mem_size*1024){};
+	+ ~IPCShmReceive();
+	+ void init() override;
+	+ void map_shm();
+	+ void open_shm();
+	+ void transfer() override;
+}
+
+class IPCShmSend
+{
+	+explicit IPCShmSend(ipc_options_t options)
+	: IPC(options),
+	FileHandler(options.file_name, FileMode::READ),
+	IPCShm(options.mem_size*1024){};
+
+	+~IPCShmSend();
+	+void init() override;
+	+void transfer() override;
+	+void open_shm();
+	+void map_shm();
+}
+
+class ChronoTime
+{
+	# std::chrono::time_point<std::chrono::system_clock> begin{}
+	# std::chrono::time_point<std::chrono::system_clock> end{}
+	# long duration{}
+
+	+ void update_all()
+	+ void update_begin()
+	+ void update_end()
+	+ long get_duration()
+}
+enum IPCProtocol<<enumeration>>
+{
+	+ NONE
+	+ MSG_QUEUE
+	+ PIPE
+	+ SHARED_MEM
+}
+
+enum IPCMode<<enumeration>>
+{
+	+ SEND_MODE
+	+ RECEIVE_MODE
+}
+
+class ipc_option_t << (S,lightblue) struct>>
+{
+	+ IPCMode mode{}
+	+ IPCProtocol protocol{NONE}
+	+ std::string server_name{}
+	+ std::string file_name{}
+	+ size_t mem_size{0}
+}
+
+class ipc_info_t << (S,lightblue) struct>>
+{
+	+ long number_of_msg{}
+	+ long read_bytes{}
+	+ long sent_bytes{}
+	+ unsigned long file_size{}
+	+ unsigned long total_sent_bytes{}
+}
+
+class ipc_shm_header_t << (S,lightblue) struct>>
+{
+	+ pthread_cond_t cond;
+	+ pthread_mutex_t mutex;
+	+ std::streamsize data_size;
+	+ size_t data_version;
+	+ std::streamsize shared_mem_size;
+	+ volatile bool is_init;
+	+ volatile bool is_read;
+	+ char data_ap[0];
+}
+
+
+
+IPC <|-- IPCMsgQSend
+FileHandler <|-- IPCMsgQSend
+IPC <|-- IPCMsgQReceive
+FileHandler <|-- IPCMsgQReceive
+
+IPC <|-- IPCPipeSend
+FileHandler <|-- IPCPipeSend
+IPC <|-- IPCPipeReceive
+FileHandler <|-- IPCPipeReceive
+
+IPC <|-- IPCShmSend
+FileHandler <|-- IPCShmSend
+IPCShm <|-- IPCShmSend
+IPC <|-- IPCShmReceive
+FileHandler <|-- IPCShmReceive
+IPCShm <|-- IPCShmReceive
+
+IPCShm -- ipc_shm_header_t
+IPCProtocol -- ipc_option_t
+ipc_option_t -- IPC
+ipc_option_t -- IPCMode
+ipc_info_t --  IPC
+ChronoTime -- IPC
+
+@enduml
