@@ -19,7 +19,7 @@ class IPCMsgQReceive : public IPC, public FileHandler
 		mq_attr attr{0, 10, 8192, 0};
 		unsigned priority{MQ_PRIO_MAX - 1};
 	public:
-		explicit IPCMsgQReceive(ipc_options_t options)
+		explicit IPCMsgQReceive(const ipc_options_t& options)
 			: IPC(options),
 			  FileHandler(options.file_name, FileMode::WRITE){};
 		~IPCMsgQReceive();

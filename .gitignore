@@ -8,6 +8,8 @@
 !README.md
 !WORKSPACE
 !build_and_test.sh
+!data/
+data/*
 !data/BUILD
 !data/readTestFile
 !environment_setup.sh

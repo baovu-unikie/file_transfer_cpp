@@ -5,6 +5,9 @@ bazel build //app:ipc_send
 bazel build //app:ipc_receive
 
 rm -rf build
+rm data/ipc_send
+rm data/ipc_receive
+
 mkdir build
 
 cp bazel-bin/app/ipc_send build

@@ -136,7 +136,9 @@ IPCProtocol IPCHandler::start() const
 		}
 		else if (opts.protocol == IPCProtocol::PIPE)
 		{
-			std::cout << "PIPE: Not implemented yet" << std::endl;
+			IPCPipeReceive pipe(this->opts);
+			pipe.init();
+			pipe.transfer();
 		}
 		else if (opts.protocol == IPCProtocol::SHARED_MEM)
 		{
@@ -153,7 +155,9 @@ IPCProtocol IPCHandler::start() const
 		}
 		else if (opts.protocol == IPCProtocol::PIPE)
 		{
-			std::cout << "PIPE: Not implemented yet" << std::endl;
+			IPCPipeSend pipe(this->opts);
+			pipe.init();
+			pipe.transfer();
 		}
 		else if (opts.protocol == IPCProtocol::SHARED_MEM)
 		{

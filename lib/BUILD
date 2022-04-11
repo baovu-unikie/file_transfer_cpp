@@ -14,6 +14,8 @@ cc_library(
         "//lib:IPC",
         "//lib:IPCMsgQReceive",
         "//lib:IPCMsgQSend",
+        "//lib:IPCPipeReceive",
+        "//lib:IPCPipeSend",
     ],
 )
 
@@ -50,6 +52,30 @@ cc_library(
     name = "IPCMsgQReceive",
     srcs = ["IPCMsgQReceive.cpp"],
     hdrs = ["IPCMsgQReceive.h"],
+    linkopts = ["-lrt"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lib:FileHandler",
+        "//lib:IPC",
+    ],
+)
+
+cc_library(
+    name = "IPCPipeSend",
+    srcs = ["IPCPipeSend.cpp"],
+    hdrs = ["IPCPipeSend.h"],
+    linkopts = ["-lrt"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lib:FileHandler",
+        "//lib:IPC",
+    ],
+)
+
+cc_library(
+    name = "IPCPipeReceive",
+    srcs = ["IPCPipeReceive.cpp"],
+    hdrs = ["IPCPipeReceive.h"],
     linkopts = ["-lrt"],
     visibility = ["//visibility:public"],
     deps = [

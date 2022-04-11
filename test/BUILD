@@ -3,13 +3,39 @@ cc_test(
     srcs = [
         "test.cpp",
     ],
-    linkopts = [
-        "-lgtest_main",
-        "-lgtest",
-        "-lpthread",
-        "-lboost_filesystem",
-    ],
+    data = ["//data"],
+    linkopts = ["-lgtest"],
     deps = [
-        "//lib:IPC",
+        "//lib:ChronoTime",
+        "//lib:FileHandler",
+        "//lib:IPCHandler",
+        "//test:ChronoTimeTestSuite",
+        "//test:DummyFileGenerator",
+        "//test:IPCHandlerTestSuite",
     ],
+)
+
+cc_library(
+    name = "IPCHandlerTestSuite",
+    srcs = ["IPCHandlerTestSuite.cpp"],
+    hdrs = ["IPCHandlerTestSuite.h"],
+    linkopts = ["-lgtest"],
+    visibility = ["//visibility:public"],
+    deps = ["//lib:IPCHandler"],
+)
+
+cc_library(
+    name = "ChronoTimeTestSuite",
+    srcs = ["ChronoTimeTestSuite.cpp"],
+    hdrs = ["ChronoTimeTestSuite.h"],
+    linkopts = ["-lgtest"],
+    visibility = ["//visibility:public"],
+    deps = ["//lib:ChronoTime"],
+)
+
+cc_library(
+    name = "DummyFileGenerator",
+    srcs = ["dummy_file_generator.cpp"],
+    hdrs = ["dummy_file_generator.h"],
+    linkopts = ["-lboost_filesystem"],
 )
