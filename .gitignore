@@ -9,8 +9,9 @@
 !WORKSPACE
 !build_and_test.sh
 !data/BUILD
+!data/readTestFile
 !environment_setup.sh
-!img/
+!uml/
 !lib/
 !app/
 !test/

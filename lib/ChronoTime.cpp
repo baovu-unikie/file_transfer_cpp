@@ -1,9 +1,9 @@
-/** @file ChronoTime.cpp
+/** @fileiChronoTime.cpp
  *  @author Bao Vu (bao.vu@unikie.com)
  *  @brief ChronoTime class methods' definition
  */
 
-#include "ChronoTime.h"
+#include "lib/ChronoTime.h"
 
 void ChronoTime::update_all()
 {
