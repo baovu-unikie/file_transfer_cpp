@@ -11,11 +11,12 @@
 #include "lib/IPC.h"
 #include "lib/IPCMsgQSend.h"
 #include "lib/IPCMsgQReceive.h"
+#include "lib/IPCPipeSend.h"
+#include "lib/IPCPipeReceive.h"
 
+const unsigned SHARED_MEM_LIMIT_IN_KB{10240};
 
-const unsigned SHARED_MEM_LIMIT_IN_KB {10240};
-
-std::vector<std::string> to_vector(int argc, char* argv[]);
+std::vector<std::string> to_vector(int argc, char *argv[]);
 
 class IPCHandler
 {

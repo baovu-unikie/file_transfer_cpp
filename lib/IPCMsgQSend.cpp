@@ -7,8 +7,7 @@
 
 IPCMsgQSend::~IPCMsgQSend()
 {
-	if (this->mqd > 0)
-		mq_close(this->mqd);
+	mq_close(this->mqd);
 	mq_unlink(this->opts.server_name.c_str());
 }
 
@@ -25,32 +24,33 @@ void IPCMsgQSend::init()
 		std::cout << "/dev/mqueue" << this->opts.server_name << " is opened." << std::endl;
 
 	this->open_file();
-	this->info.file_size = this->get_file_size();
-	if (this->info.file_size == 0)
-		throw std::runtime_error("ERROR: File size = 0.");
 	this->timer.update_all();
 }
 
 void IPCMsgQSend::transfer()
 {
 	long mq_send_return_value{0};
+	long read_bytes{0};
 	std::vector<char> buffer(this->attr.mq_msgsize);
+	unsigned total_sent_bytes{0};
+	unsigned long file_size = this->get_file_size();
+	if (file_size == 0)
+		throw std::runtime_error("ERROR: File size = 0.");
 
 	std::cout << "Sending..." << std::endl;
 	while (!this->fs.eof())
 	{
 		this->read_file(buffer, this->attr.mq_msgsize);
-		this->info.read_bytes = this->fs.gcount();
+		read_bytes = this->fs.gcount();
 
-		if (this->info.read_bytes > 0)
+		if (read_bytes > 0)
 		{
 			errno = 0; // clear errno
-			mq_send_return_value = mq_send(this->mqd, buffer.data(), this->info.read_bytes,
+			mq_send_return_value = mq_send(this->mqd, buffer.data(), read_bytes,
 										   this->priority);
 			if (mq_send_return_value == 0)
 			{
-				this->info.total_sent_bytes += this->info.read_bytes;
-				++(this->info.number_of_msg);
+				total_sent_bytes += read_bytes;
 				this->timer.update_all();
 			}
 			else if (mq_send_return_value == -1 && errno == EAGAIN)
@@ -59,12 +59,11 @@ void IPCMsgQSend::transfer()
 				{
 					this->timer.update_end();
 					errno = 0; // clear errno
-					mq_send_return_value = mq_send(this->mqd, buffer.data(), this->info.read_bytes,
+					mq_send_return_value = mq_send(this->mqd, buffer.data(), read_bytes,
 												   this->priority);
 					if (mq_send_return_value == 0)
 					{
-						this->info.total_sent_bytes += this->info.read_bytes;
-						++(this->info.number_of_msg);
+						total_sent_bytes += read_bytes;
 						this->timer.update_all();
 					}
 				}
@@ -77,10 +76,9 @@ void IPCMsgQSend::transfer()
 		}
 	}
 
-	std::cout << this->info.number_of_msg << " message(s) were sent to the queue (/dev/mqueue"
-			  << this->opts.server_name << ")." << std::endl;
+	std::cout << "Sent data: " << total_sent_bytes << std::endl;
 
-	if (this->info.total_sent_bytes == this->info.file_size)
+	if (total_sent_bytes == file_size)
 	{
 		this->timer.update_all();
 

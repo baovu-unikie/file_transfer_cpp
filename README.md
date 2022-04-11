@@ -48,10 +48,10 @@ ipc_receive -q /queue_name -f file_name
 ## Todo
 - [ ] Message Quue
     - [x] Functional
-    - [ ] Test cases
-- [ ] Pipe
-    - [ ] Functional
-    - [ ] Test cases
+    - [x] Test cases
+- [x] Pipe
+    - [x] Functional
+    - [x] Test cases
 - [ ] Shared Memory
     - [ ] Functional
     - [ ] Test cases

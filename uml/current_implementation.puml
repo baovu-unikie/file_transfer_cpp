@@ -56,12 +56,53 @@ class IPCMsgQReceive
 	# mqd_t mqd{};
 	# mq_attr attr{0, 10, 8192, 0};
 	# unsigned priority{MQ_PRIO_MAX - 1};
+
 	+ explicit IPCMsgQReceive(ipc_options_t options)
 	 	: IPC(options),
 	 	  FileHandler(options.file_name, FileMode::WRITE){};
 	+ ~IPCMsgQReceive();
 	+ void init() override;
 	+ void transfer() override;
+}
+
+class IPCPipeReceive
+{
+	# int pd{0};
+	# std::streamsize  p_msgsize{PIPE_BUF};
+
+	+ explicit IPCPipeReceive(ipc_options_t options)
+	+ : IPC(options),
+	+ FileHandler(options.file_name, FileMode::WRITE) {};
+	+ ~IPCPipeReceive();
+	+ void init() override;
+	+ void transfer() override;
+
+}
+
+class IPCPipeSend
+{
+	# int pd{0};
+	# std::streamsize  p_msgsize{PIPE_BUF};
+
+	+ explicit IPCPipeSend(ipc_options_t options)
+	+ : IPC(options),
+	+ FileHandler(options.file_name, FileMode::READ) {};
+	+ ~IPCPipeSend();
+	+ void init() override;
+	+ void transfer() override;
+}
+
+
+class ChronoTime
+{
+	# std::chrono::time_point<std::chrono::system_clock> begin{}
+	# std::chrono::time_point<std::chrono::system_clock> end{}
+	# long duration{}
+
+	+ void update_all()
+	+ void update_begin()
+	+ void update_end()
+	+ long get_duration()
 }
 
 enum IPCProtocol<<enumeration>>
@@ -87,37 +128,19 @@ class ipc_option_t << (S,lightblue) struct>>
 	+ size_t mem_size{0}
 }
 
-class ipc_info_t << (S,lightblue) struct>>
-{
-	+ long number_of_msg{}
-	+ long read_bytes{}
-	+ long sent_bytes{}
-	+ unsigned long file_size{}
-	+ unsigned long total_sent_bytes{}
-}
-
-class ChronoTime
-{
-	# std::chrono::time_point<std::chrono::system_clock> begin{}
-	# std::chrono::time_point<std::chrono::system_clock> end{}
-	# long duration{}
-
-	+ void update_all()
-	+ void update_begin()
-	+ void update_end()
-	+ long get_duration()
-}
-
 IPC <|-- IPCMsgQSend
 FileHandler <|-- IPCMsgQSend
-
 IPC <|-- IPCMsgQReceive
 FileHandler <|-- IPCMsgQReceive
+
+IPC <|-- IPCPipeSend
+FileHandler <|-- IPCPipeSend
+IPC <|-- IPCPipeReceive
+FileHandler <|-- IPCPipeReceive
 
 IPCProtocol -- ipc_option_t
 ipc_option_t -- IPC
 ipc_option_t -- IPCMode
-ipc_info_t --  IPC
 ChronoTime -- IPC
 
 @enduml
