@@ -68,9 +68,9 @@ ipc_receive -q /queue_name -f file_name
 
 ## Implementation
 ### Current
-![Current Implementation](img/current_implementation.png)
+![Current Implementation](uml/current_implementation.png)
 
 ### Plan
-![Future Implementation](img/future_implementation.png)
+![Future Implementation](uml/future_implementation.png)
 
 ---
