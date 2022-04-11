@@ -5,8 +5,8 @@ bazel build //app:ipc_send
 bazel build //app:ipc_receive
 
 rm -rf build
-rm data/ipc_send
-rm data/ipc_receive
+rm -f data/ipc_send
+rm -f data/ipc_receive
 
 mkdir build
 
