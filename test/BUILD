@@ -17,7 +17,6 @@ cc_test(
 
 cc_library(
     name = "IPCHandlerTestSuite",
-    srcs = ["IPCHandlerTestSuite.cpp"],
     hdrs = ["IPCHandlerTestSuite.h"],
     linkopts = ["-lgtest"],
     visibility = ["//visibility:public"],
@@ -26,7 +25,6 @@ cc_library(
 
 cc_library(
     name = "ChronoTimeTestSuite",
-    srcs = ["ChronoTimeTestSuite.cpp"],
     hdrs = ["ChronoTimeTestSuite.h"],
     linkopts = ["-lgtest"],
     visibility = ["//visibility:public"],
