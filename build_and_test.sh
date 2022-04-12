@@ -16,7 +16,7 @@ cp bazel-bin/app/ipc_receive build
 cp bazel-bin/app/ipc_send data
 cp bazel-bin/app/ipc_receive data
 
-bazel coverage test:test --combined_report=lcov --instrumentation_filter="//lib[/:]"
+bazel coverage test:test --combined_report=lcov --instrumentation_filter="//lib[/:]" --java_runtime_version=remotejdk_11
 
 cp bazel-testlogs/test/test/test.log build
 cp bazel-out/_coverage/_coverage_report.dat build

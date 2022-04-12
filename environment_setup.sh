@@ -13,7 +13,7 @@ install_bazel () {
 }
 
 # Installation using apt
-REQUIRED_PACKAGES=( git libboost-all-dev libgtest-dev apt-transport-https curl gnupg )
+REQUIRED_PACKAGES=( git libboost-all-dev libgtest-dev apt-transport-https curl gnupg lcov )
 
 for each in "${REQUIRED_PACKAGES[@]}"
 do
