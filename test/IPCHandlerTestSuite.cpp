@@ -9,6 +9,8 @@ INSTANTIATE_TEST_SUITE_P
 (, IPCHandlerTestSuite, testing::Values(
 	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>({"SendPipeShort", "-p", "my_pipe", "-f", "file_name"}),
 					IPCProtocol::PIPE, 0, "file_name", "my_pipe", false, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>({"SendPipeShortBigFile", "-p", "my_pipe", "-f", "file_name"}),
+					IPCProtocol::PIPE, 0, "file_name", "my_pipe", false, 1, "GB"),
 	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>({"SendPipeShortFileSizeZero", "-p", "my_pipe", "-f", "file_name"}),
 					IPCProtocol::PIPE, 0, "file_name", "my_pipe", false, 0, "MB"),
 	std::make_tuple(IPCMode::SEND_MODE,
@@ -17,6 +19,9 @@ INSTANTIATE_TEST_SUITE_P
 	std::make_tuple(IPCMode::SEND_MODE,
 					std::vector<std::string>({"SendMsgQShortFileSizeZero", "-q", "/my_queue", "-f", "file_name"}),
 					IPCProtocol::MSG_QUEUE, 0, "file_name", "/my_queue", false, 0, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendMsgQShortBigFile", "-q", "/my_queue", "-f", "file_name"}),
+					IPCProtocol::MSG_QUEUE, 0, "file_name", "/my_queue", false, 1, "GB"),
 	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
 						{"SendPipeShortExtraEnd", "-p", "my_pipe", "-f", "file_name", "extra_arg"}), IPCProtocol::PIPE, 0, "file_name",
 					"my_pipe", true, 10, "MB"),
