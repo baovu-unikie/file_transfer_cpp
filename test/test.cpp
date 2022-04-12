@@ -121,7 +121,7 @@ TEST_P(IPCHandlerTestSuite, IPCStart)
 		}
 		else if (mode == IPCMode::RECEIVE_MODE && protocol != IPCProtocol::NONE)
 		{
-			std::string send_file_name = "tx_file";
+			std::string send_file_name = "tx_file_name";
 			generate_dummy_files(send_file_name, file_size, file_unit);
 
 			if (protocol == IPCProtocol::PIPE)
@@ -139,7 +139,7 @@ TEST_P(IPCHandlerTestSuite, IPCStart)
 		}
 		else if (mode == IPCMode::SEND_MODE && protocol != IPCProtocol::NONE)
 		{
-			std::string rcv_file_name = "rx_file";
+			std::string rcv_file_name = "rx_file_name";
 			generate_dummy_files(file_name, file_size, file_unit);
 
 			if (protocol == IPCProtocol::PIPE)
@@ -212,6 +212,7 @@ TEST(FileHandlerTestSuite, FileOperation)
 	f_write.open_file();
 	EXPECT_NO_THROW(f_write.write_file(write_str, str_size));
 	EXPECT_THROW(f_write.read_file(read_str, str_size), std::runtime_error);
+	f_write.close_file();
 	EXPECT_EQ(f_write.get_file_size(), str_size);
 
 	FileHandler f_not_exist(file_not_exist, FileMode::READ);

@@ -30,27 +30,16 @@ struct ipc_options_t
 	std::string server_name;
 };
 
-struct ipc_info_t
-{
-	long number_of_msg{};
-	long read_bytes{};
-	long sent_bytes{};
-	unsigned long file_size{};
-	unsigned long total_sent_bytes{};
-};
-
-
 class IPC
 {
 	protected:
 		ipc_options_t opts{};
-		ipc_info_t info{};
-		long timeout{2};
+		long timeout{3};
 		ChronoTime timer;
-		std::vector<char> buffer{};
 
 	public:
-		explicit IPC(ipc_options_t options) : opts(std::move(options)){};
+		explicit IPC(ipc_options_t options) : opts(std::move(options))
+		{};
 		virtual void init() = 0;
 		virtual void transfer() = 0;
 };

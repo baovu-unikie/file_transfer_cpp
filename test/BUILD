@@ -4,7 +4,7 @@ cc_test(
         "test.cpp",
     ],
     data = ["//data"],
-    linkopts = ["-lgtest"],
+    linkopts = ["-lgtest", "-lpthread"],
     deps = [
         "//lib:ChronoTime",
         "//lib:FileHandler",

@@ -7,8 +7,7 @@
 
 IPCPipeSend::~IPCPipeSend()
 {
-	if (this->pd > 0)
-		close(this->pd);
+	close(this->pd);
 	unlink(this->opts.server_name.c_str());
 }
 
@@ -28,9 +27,6 @@ void IPCPipeSend::init()
 
 
 	this->open_file();
-	this->info.file_size = this->get_file_size();
-	if (this->info.file_size == 0)
-		throw std::runtime_error("ERROR: File size = 0.");
 	this->timer.update_all();
 
 }
@@ -38,6 +34,12 @@ void IPCPipeSend::init()
 void IPCPipeSend::transfer()
 {
 	std::vector<char> buffer(this->p_msgsize);
+	long sent_bytes{0};
+	long read_bytes{0};
+	unsigned long total_sent_bytes{0};
+	unsigned long file_size = this->get_file_size();
+	if (file_size == 0)
+		throw std::runtime_error("ERROR: File size = 0.");
 
 	std::cout << "Sending..." << std::endl;
 	while (!(this->fs.eof()))
@@ -46,14 +48,14 @@ void IPCPipeSend::transfer()
 		if (this->fs.bad()) // check read/writing error on i/o operation
 			throw std::runtime_error("ERROR: istream::read().");
 
-		this->info.read_bytes = this->fs.gcount();
-		if (this->info.read_bytes > 0)
+		read_bytes = this->fs.gcount();
+		if (read_bytes > 0)
 		{
 			errno = 0; // clear errno
-			this->info.sent_bytes = write(this->pd, buffer.data(), this->info.read_bytes);
-			if (this->info.sent_bytes == this->info.read_bytes && this->info.sent_bytes != 0)
+			sent_bytes = write(this->pd, buffer.data(), read_bytes);
+			if (sent_bytes == read_bytes && sent_bytes != 0)
 			{
-				this->info.total_sent_bytes += this->info.sent_bytes;
+				total_sent_bytes += sent_bytes;
 				this->timer.update_all();
 
 				if (this->fs.eof()) // wait for receiver 10s before close the pipe
@@ -61,16 +63,16 @@ void IPCPipeSend::transfer()
 						this->timer.update_end();
 
 			}
-			else if (this->info.sent_bytes == -1 && errno == EAGAIN)
+			else if (sent_bytes == -1 && errno == EAGAIN)
 			{
 				while (errno == EAGAIN && this->timer.get_duration() < this->timeout)
 				{
 					this->timer.update_end();
 					errno = 0;
-					this->info.sent_bytes = write(this->pd, buffer.data(), this->info.read_bytes);
-					if (this->info.sent_bytes == this->info.read_bytes)
+					sent_bytes = write(this->pd, buffer.data(), read_bytes);
+					if (sent_bytes == read_bytes)
 					{
-						this->info.total_sent_bytes += this->info.sent_bytes;
+						total_sent_bytes += sent_bytes;
 						this->timer.update_all();
 					}
 				}
@@ -83,8 +85,8 @@ void IPCPipeSend::transfer()
 		}
 	}
 
-	if (this->info.total_sent_bytes == this->info.file_size && this->info.sent_bytes != 0)
-		std::cout << "Sent " << this->info.total_sent_bytes << " byte(s)." << std::endl;
+	if (total_sent_bytes == file_size && sent_bytes != 0)
+		std::cout << "Sent data: " << total_sent_bytes << " byte(s)." << std::endl;
 	else
 		throw std::runtime_error("ERROR: Uncompleted transfer");
 

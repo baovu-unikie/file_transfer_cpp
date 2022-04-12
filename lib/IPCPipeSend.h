@@ -12,19 +12,19 @@
 #include "lib/IPC.h"
 #include "lib/FileHandler.h"
 
-class IPCPipeSend: public IPC, public FileHandler
+class IPCPipeSend : public IPC, public FileHandler
 {
 	protected:
 		int pd{0};
-		std::streamsize  p_msgsize{PIPE_BUF};
+		std::streamsize p_msgsize{PIPE_BUF};
 	public:
-		explicit IPCPipeSend(const ipc_options_t& options)
-		: IPC(options),
-		FileHandler(options.file_name, FileMode::READ) {};
+		explicit IPCPipeSend(const ipc_options_t &options)
+			: IPC(options),
+			  FileHandler(options.file_name, FileMode::READ)
+		{};
 		~IPCPipeSend();
 		void init() override;
 		void transfer() override;
 };
-
 
 #endif //IPCPIPESEND_H

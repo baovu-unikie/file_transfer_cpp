@@ -7,8 +7,7 @@
 
 IPCMsgQReceive::~IPCMsgQReceive()
 {
-	if (this->mqd > 0)
-		mq_close(this->mqd);
+	mq_close(this->mqd);
 	mq_unlink(this->opts.server_name.c_str());
 }
 
@@ -21,6 +20,7 @@ void IPCMsgQReceive::init()
 	{
 		this->timer.update_end();
 		this->mqd = mq_open(this->opts.server_name.c_str(), O_RDONLY | O_NONBLOCK, 0660, &(this->attr));
+		sleep(1);
 	} while (this->mqd == -1 && (this->timer.get_duration() < this->timeout));
 
 	if (this->mqd == -1)
@@ -36,21 +36,20 @@ void IPCMsgQReceive::init()
 void IPCMsgQReceive::transfer()
 {
 	std::vector<char> buffer(this->attr.mq_msgsize);
-
+	long read_bytes{0};
 	std::cout << "Waiting for new message..." << std::endl;
 	errno = 0; // clear error number
 	while (errno != EAGAIN || ((errno == EAGAIN) && (this->timer.get_duration() < this->timeout)))
 	{
 		errno = 0; // clear error number
-		this->info.read_bytes = mq_receive(this->mqd, buffer.data(), this->attr.mq_msgsize, nullptr);
-		if (this->info.read_bytes > 0)
+		read_bytes = mq_receive(this->mqd, buffer.data(), this->attr.mq_msgsize, nullptr);
+		if (read_bytes > 0)
 		{
-			this->write_file(buffer, this->info.read_bytes);
+			this->write_file(buffer, read_bytes);
 			this->timer.update_begin();
 		}
 		this->timer.update_end();
 	}
 
-	this->fs.close();
-	std::cout << "The message queue is closed. Received data: " << this->get_file_size() << " byte(s)" << std::endl;
+	std::cout << "Received data: " << this->get_file_size() << " byte(s)" << std::endl;
 }
