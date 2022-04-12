@@ -104,6 +104,7 @@ class ChronoTime
 	+ void update_end()
 	+ long get_duration()
 }
+
 enum IPCProtocol<<enumeration>>
 {
 	+ NONE
