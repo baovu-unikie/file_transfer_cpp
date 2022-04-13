@@ -12,6 +12,7 @@
 #include "lib/FileHandler.h"
 #include "test/dummy_file_generator.h"
 
+// Test set_options() of IPCHandler class
 TEST_P(IPCHandlerTestSuite, SetOptions)
 {
 	std::stringstream buffer;
@@ -88,6 +89,7 @@ TEST_P(IPCHandlerTestSuite, SetOptions)
 	}
 }
 
+// Test non-member function to_vector
 TEST_P(IPCHandlerTestSuite, ToVector)
 {
 	// construct char *arr[] to use as args of to_vector()
@@ -108,22 +110,27 @@ TEST_P(IPCHandlerTestSuite, ToVector)
 		delete[] arr[i];
 }
 
+// Test start() functions of IPCHandler class (both sender & receiver are running)
 TEST_P(IPCHandlerTestSuite, IPCStart)
 {
 	if (!is_throw)
 	{
 		boost::process::child c;
 
+		// When in send mode and file_size = 0 expect throw
 		if(mode == IPCMode::SEND_MODE && file_size == 0)
 		{
 			ipc_handler.set_options(mode, argv);
 			EXPECT_THROW(ipc_handler.start(), std::runtime_error);
 		}
+		// When a protocol is specified and in receive mode
 		else if (mode == IPCMode::RECEIVE_MODE && protocol != IPCProtocol::NONE)
 		{
+			// create file to send
 			std::string send_file_name = "tx_file_name";
 			generate_dummy_files(send_file_name, file_size, file_unit);
 
+			// start a child process (run sender)
 			if (protocol == IPCProtocol::PIPE)
 				c = boost::process::child("data/ipc_send", "-p", server_name.c_str(), "-f", send_file_name.c_str());
 			if (protocol == IPCProtocol::MSG_QUEUE)
@@ -134,14 +141,18 @@ TEST_P(IPCHandlerTestSuite, IPCStart)
 
 			ipc_handler.set_options(mode, argv);
 			ipc_handler.start();
-			c.wait();
+			c.wait(); // wait for the child exits
 			EXPECT_EQ(boost::filesystem::file_size(send_file_name), boost::filesystem::file_size(file_name));
 		}
+		// When a protocol is specified and in send mode
 		else if (mode == IPCMode::SEND_MODE && protocol != IPCProtocol::NONE)
 		{
+			// give a name for the received file
 			std::string rcv_file_name = "rx_file_name";
+			// create a file to send
 			generate_dummy_files(file_name, file_size, file_unit);
 
+			// start a child process (run receiver)
 			if (protocol == IPCProtocol::PIPE)
 				c = boost::process::child("data/ipc_receive", "-p", server_name.c_str(), "-f", rcv_file_name.c_str());
 			if (protocol == IPCProtocol::MSG_QUEUE)
@@ -152,12 +163,13 @@ TEST_P(IPCHandlerTestSuite, IPCStart)
 
 			ipc_handler.set_options(mode, argv);
 			ipc_handler.start();
-			c.wait();
+			c.wait(); // wait for the child exits
 			EXPECT_EQ(boost::filesystem::file_size(rcv_file_name), boost::filesystem::file_size(file_name));
 		}
 	}
 }
 
+// Test start() functions of IPCHandler class (only receiver is start -> throw runtime error)
 TEST_P(IPCHandlerTestSuite, IPCStartNoSender)
 {
 	if (!is_throw && mode == IPCMode::RECEIVE_MODE && protocol != IPCProtocol::NONE)
@@ -169,6 +181,7 @@ TEST_P(IPCHandlerTestSuite, IPCStartNoSender)
 	}
 }
 
+// Test start() functions of IPCHandler class (only sender is start -> throw runtime error)
 TEST_P(IPCHandlerTestSuite, IPCStartNoReceiver)
 {
 	if (!is_throw && mode == IPCMode::SEND_MODE && protocol != IPCProtocol::NONE)
@@ -180,6 +193,7 @@ TEST_P(IPCHandlerTestSuite, IPCStartNoReceiver)
 	}
 }
 
+// Test all functions of ChronoTime class
 TEST_P(ChronoTimeTestSuite, Timer)
 {
 	if (test_name == "UpdateAll")
@@ -193,6 +207,7 @@ TEST_P(ChronoTimeTestSuite, Timer)
 	EXPECT_EQ(expected_duration, timer.get_duration());
 }
 
+// Test FileHandler class
 TEST(FileHandlerTestSuite, FileOperation)
 {
 	std::streamsize str_size{4};
@@ -220,6 +235,7 @@ TEST(FileHandlerTestSuite, FileOperation)
 
 }
 
+// list of arguments and test cases to use with IPCHandlerTestSuite
 INSTANTIATE_TEST_SUITE_P
 (, IPCHandlerTestSuite, testing::Values(
 	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>({"SendPipeShort", "-p", "my_pipe", "-f", "file_name"}),
@@ -482,6 +498,7 @@ INSTANTIATE_TEST_SUITE_P
 					IPCProtocol::NONE, 0, "", "", true, 10, "MB")
 ), IPCHandlerTestSuite::PrintToStringParamName());
 
+// List of test cases using for testing ChronoTime class
 INSTANTIATE_TEST_SUITE_P
 (, ChronoTimeTestSuite, testing::Values(
 	std::make_tuple("UpdateAll", 0),
