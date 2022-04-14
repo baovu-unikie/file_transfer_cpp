@@ -90,7 +90,7 @@ cc_library(
     name = "IPCShm",
     srcs = ["IPCShm.cpp"],
     hdrs = ["IPCShm.h"],
-    linkopts = ["-lrt"],
+    linkopts = ["-lpthread"],
     visibility = ["//visibility:public"],
 )
 
@@ -98,7 +98,7 @@ cc_library(
     name = "IPCShmSend",
     srcs = ["IPCShmSend.cpp"],
     hdrs = ["IPCShmSend.h"],
-    linkopts = ["-lrt"],
+    linkopts = ["-lpthread"],
     visibility = ["//visibility:public"],
     deps = [
         "//lib:FileHandler",
@@ -111,7 +111,7 @@ cc_library(
     name = "IPCShmReceive",
     srcs = ["IPCShmReceive.cpp"],
     hdrs = ["IPCShmReceive.h"],
-    linkopts = ["-lrt"],
+    linkopts = ["-lpthread"],
     visibility = ["//visibility:public"],
     deps = [
         "//lib:FileHandler",
