@@ -19,7 +19,11 @@ TEST_P(IPCHandlerTestSuite, SetOptions)
 	auto sbuf = std::cout.rdbuf();
 
 	if (is_throw)
+	{
+		std::cout.rdbuf(buffer.rdbuf());
 		EXPECT_THROW(ipc_handler.set_options(mode, argv), std::runtime_error);
+		std::cout.rdbuf(sbuf);
+	}
 	else
 	{
 		std::cout.rdbuf(buffer.rdbuf());
