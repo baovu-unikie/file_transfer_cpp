@@ -142,7 +142,9 @@ IPCProtocol IPCHandler::start() const
 		}
 		else if (opts.protocol == IPCProtocol::SHARED_MEM)
 		{
-			std::cout << "SHARED_MEM: Not implemented yet" << std::endl;
+			IPCShmReceive shm(this->opts);
+			shm.init();
+			shm.transfer();
 		}
 	}
 	else if (opts.mode == IPCMode::SEND_MODE)
@@ -161,7 +163,9 @@ IPCProtocol IPCHandler::start() const
 		}
 		else if (opts.protocol == IPCProtocol::SHARED_MEM)
 		{
-			std::cout << "SHARED_MEM: Not implemented yet" << std::endl;
+			IPCShmSend shm(this->opts);
+			shm.init();
+			shm.transfer();
 		}
 	}
 	return opts.protocol;

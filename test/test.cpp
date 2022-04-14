@@ -122,12 +122,12 @@ TEST_P(IPCHandlerTestSuite, IPCStart)
 		boost::process::child c;
 
 		// When in send mode and file_size = 0 expect throw
-		if(mode == IPCMode::SEND_MODE && file_size == 0)
+		if (mode == IPCMode::SEND_MODE && file_size == 0)
 		{
 			ipc_handler.set_options(mode, argv);
 			EXPECT_THROW(ipc_handler.start(), std::runtime_error);
 		}
-		// When a protocol is specified and in receive mode
+			// When a protocol is specified and in receive mode
 		else if (mode == IPCMode::RECEIVE_MODE && protocol != IPCProtocol::NONE)
 		{
 			// create file to send
@@ -148,7 +148,7 @@ TEST_P(IPCHandlerTestSuite, IPCStart)
 			c.wait(); // wait for the child exits
 			EXPECT_EQ(boost::filesystem::file_size(send_file_name), boost::filesystem::file_size(file_name));
 		}
-		// When a protocol is specified and in send mode
+			// When a protocol is specified and in send mode
 		else if (mode == IPCMode::SEND_MODE && protocol != IPCProtocol::NONE)
 		{
 			// give a name for the received file
@@ -244,9 +244,11 @@ INSTANTIATE_TEST_SUITE_P
 (, IPCHandlerTestSuite, testing::Values(
 	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>({"SendPipeShort", "-p", "my_pipe", "-f", "file_name"}),
 					IPCProtocol::PIPE, 0, "file_name", "my_pipe", false, 10, "MB"),
-	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>({"SendPipeShortBigFile", "-p", "my_pipe", "-f", "file_name"}),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendPipeShortBigFile", "-p", "my_pipe", "-f", "file_name"}),
 					IPCProtocol::PIPE, 0, "file_name", "my_pipe", false, 1, "GB"),
-	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>({"SendPipeShortFileSizeZero", "-p", "my_pipe", "-f", "file_name"}),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendPipeShortFileSizeZero", "-p", "my_pipe", "-f", "file_name"}),
 					IPCProtocol::PIPE, 0, "file_name", "my_pipe", false, 0, "MB"),
 	std::make_tuple(IPCMode::SEND_MODE,
 					std::vector<std::string>({"SendMsgQShort", "-q", "/my_queue", "-f", "file_name"}),
@@ -499,7 +501,130 @@ INSTANTIATE_TEST_SUITE_P
 	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>({"ReceiveShortHelpExtra", "extra", "-h"}),
 					IPCProtocol::NONE, 0, "", "", true, 10, "MB"),
 	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>({"ReceiveLongHelpExtra", "extra", "--help"}),
-					IPCProtocol::NONE, 0, "", "", true, 10, "MB")
+					IPCProtocol::NONE, 0, "", "", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShort", "-s", "/my_shm", "4", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortBigSize", "-s", "/my_shm", "4", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 1, "GB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortFileSizeZero", "-s", "/my_shm", "4", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 0, "KB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortMissingSlash", "-s", "my_shm", "4", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortDoubleSlash", "-s", "/my_/shm", "4", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortZeroSize", "-s", "/my_shm", "0", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 0, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortMaxSize", "-s", "/my_shm", "10240", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 10240, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortOverSize", "-s", "/my_shm", "10241", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 10241, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortNegativeSize", "-s", "/my_shm", "-1024", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, -1024, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortWrongType", "-s", "/my_shm", "abc", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, -1024, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmShortExtraEnd", "-s", "/my_shm", "4", "-f", "file_name", "extra_arg"}), IPCProtocol::SHARED_MEM, 4,
+					"file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmShortExtraMid", "-s", "/my_shm", "4", "extra_arg", "-f", "file_name"}), IPCProtocol::SHARED_MEM, 4,
+					"file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmShortExtraStart", "extra_arg", "-s", "/my_shm", "4", "-f", "file_name"}), IPCProtocol::SHARED_MEM, 4,
+					"file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmShortInverted", "-f", "file_name", "-s", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmShortExtraEndInverted", "-f", "file_name", "extra_arg", "-s", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmShortExtraMidInverted", "-f", "file_name", "extra_arg", "-s", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmShortExtraStartInverted", "extra_arg", "-f", "file_name", "-s", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmLong", "--shm", "/my_shm", "4", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmLongExtraEnd", "--shm", "/my_shm", "4", "-f", "file_name", "extra_arg"}), IPCProtocol::SHARED_MEM, 4,
+					"file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmLongExtraMid", "--shm", "/my_shm", "4", "extra_arg", "-f", "file_name"}), IPCProtocol::SHARED_MEM, 4,
+					"file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmLongExtraStart", "extra_arg", "--shm", "/my_shm", "4", "-f", "file_name"}), IPCProtocol::SHARED_MEM, 4,
+					"file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE,
+					std::vector<std::string>({"SendShmLongInverted", "-f", "file_name", "--shm", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmLongExtraEndInverted", "-f", "file_name", "extra_arg", "--shm", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmLongExtraMidInverted", "-f", "file_name", "extra_arg", "--shm", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::SEND_MODE, std::vector<std::string>(
+						{"SendShmLongExtraStartInverted", "extra_arg", "-f", "file_name", "--shm", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE,
+					std::vector<std::string>({"ReceiveShmShort", "-s", "/my_shm", "4", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmShortExtraEnd", "-s", "/my_shm", "4", "-f", "file_name", "extra_arg"}), IPCProtocol::SHARED_MEM, 4,
+					"file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmShortExtraMid", "-s", "/my_shm", "4", "extra_arg", "-f", "file_name"}), IPCProtocol::SHARED_MEM, 4,
+					"file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmShortExtraStart", "extra_arg", "-s", "/my_shm", "4", "-f", "file_name"}), IPCProtocol::SHARED_MEM,
+					4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE,
+					std::vector<std::string>({"ReceiveShmShortInverted", "-f", "file_name", "-s", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmShortExtraEndInverted", "-f", "file_name", "extra_arg", "-s", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmShortExtraMidInverted", "-f", "file_name", "extra_arg", "-s", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmShortExtraStartInverted", "extra_arg", "-f", "file_name", "-s", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE,
+					std::vector<std::string>({"ReceiveShmLong", "--shm", "/my_shm", "4", "-f", "file_name"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmLongExtraEnd", "--shm", "/my_shm", "4", "-f", "file_name", "extra_arg"}), IPCProtocol::SHARED_MEM,
+					4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmLongExtraMid", "--shm", "/my_shm", "4", "extra_arg", "-f", "file_name"}), IPCProtocol::SHARED_MEM,
+					4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmLongExtraStart", "extra_arg", "--shm", "/my_shm", "4", "-f", "file_name"}), IPCProtocol::SHARED_MEM,
+					4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE,
+					std::vector<std::string>({"ReceiveShmLongInverted", "-f", "file_name", "--shm", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", false, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmLongExtraEndInverted", "-f", "file_name", "extra_arg", "--shm", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmLongExtraMidInverted", "-f", "file_name", "extra_arg", "--shm", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB"),
+	std::make_tuple(IPCMode::RECEIVE_MODE, std::vector<std::string>(
+						{"ReceiveShmLongExtraStartInverted", "extra_arg", "-f", "file_name", "--shm", "/my_shm", "4"}),
+					IPCProtocol::SHARED_MEM, 4, "file_name", "/my_shm", true, 10, "MB")
 ), IPCHandlerTestSuite::PrintToStringParamName());
 
 // List of test cases using for testing ChronoTime class

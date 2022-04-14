@@ -13,6 +13,8 @@
 #include "lib/IPCMsgQReceive.h"
 #include "lib/IPCPipeSend.h"
 #include "lib/IPCPipeReceive.h"
+#include "lib/IPCShmSend.h"
+#include "lib/IPCShmReceive.h"
 
 const unsigned SHARED_MEM_LIMIT_IN_KB{10240};
 
