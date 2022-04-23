@@ -28,7 +28,7 @@ void IPCShmReceive::transfer()
 		while (this->last_version == this->shm_ptr->data_version)
 		{
 			if (pthread_cond_wait(&(this->shm_ptr->cond), &(this->shm_ptr->mutex)) != 0)
-				throw std::runtime_error(static_cast<std::string>("ERROR: pthread_cond_wait(): ") + strerror(errno));
+				throw std::runtime_error(std::string("ERROR: pthread_cond_wait(): ") + strerror(errno));
 		}
 		if (this->shm_ptr->shared_mem_size != this->shm_size_in_bytes)
 			throw std::runtime_error("ERROR: Shared memory size of server and client side are not the same.");
@@ -70,7 +70,7 @@ void IPCShmReceive::map_shm()
 		++tries;
 
 		if (tries >= this->number_of_tries)
-			throw std::runtime_error(static_cast<std::string>("ERROR: mmap64(): ") + strerror(errno));
+			throw std::runtime_error("ERROR: Waited for sender for more than " + std::to_string(this->timeout) + " second(s). mmap64(): " + strerror(errno));
 		sleep(1);
 	}
 }
@@ -87,7 +87,7 @@ void IPCShmReceive::open_shm()
 		++tries;
 
 		if (tries >= this->number_of_tries)
-			throw std::runtime_error(static_cast<std::string>("ERROR: shm_open(): ") + strerror(errno));
+			throw std::runtime_error("ERROR: Waited for sender for more than " + std::to_string(this->timeout) + " second(s). shm_open(): " + strerror(errno));
 
 		sleep(1);
 	}

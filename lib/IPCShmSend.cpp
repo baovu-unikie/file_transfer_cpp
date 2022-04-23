@@ -65,7 +65,7 @@ void IPCShmSend::transfer()
 		this->timer.update_end();
 	}
 
-	if (total_sent_bytes == file_size)
+	if (total_sent_bytes == file_size && this->is_end)
 		std::cout << "Sent: " << total_sent_bytes << " byte(s)." << std::endl;
 	else if (this->timer.get_duration() >= this->timeout)
 		throw std::runtime_error(
