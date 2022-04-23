@@ -69,7 +69,7 @@ void IPCShmReceive::map_shm()
 
 		++tries;
 
-		if (tries >= this->number_of_tries)
+		if (tries >= this->timeout)
 			throw std::runtime_error("ERROR: Waited for sender for more than " + std::to_string(this->timeout) + " second(s). mmap64(): " + strerror(errno));
 		sleep(1);
 	}
@@ -86,7 +86,7 @@ void IPCShmReceive::open_shm()
 
 		++tries;
 
-		if (tries >= this->number_of_tries)
+		if (tries >= this->timeout)
 			throw std::runtime_error("ERROR: Waited for sender for more than " + std::to_string(this->timeout) + " second(s). shm_open(): " + strerror(errno));
 
 		sleep(1);

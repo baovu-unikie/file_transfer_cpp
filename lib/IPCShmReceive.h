@@ -13,7 +13,6 @@
 class IPCShmReceive: public IPC, public FileHandler, public IPCShm
 {
 	protected:
-		unsigned number_of_tries {10};
 		size_t last_version{0};
 	public:
 		explicit IPCShmReceive(const ipc_options_t& options)
