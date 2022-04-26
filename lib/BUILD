@@ -16,6 +16,8 @@ cc_library(
         "//lib:IPCMsgQSend",
         "//lib:IPCPipeReceive",
         "//lib:IPCPipeSend",
+        "//lib:IPCShmReceive",
+        "//lib:IPCShmSend",
     ],
 )
 
@@ -81,5 +83,39 @@ cc_library(
     deps = [
         "//lib:FileHandler",
         "//lib:IPC",
+    ],
+)
+
+cc_library(
+    name = "IPCShm",
+    srcs = ["IPCShm.cpp"],
+    hdrs = ["IPCShm.h"],
+    linkopts = ["-lpthread"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "IPCShmSend",
+    srcs = ["IPCShmSend.cpp"],
+    hdrs = ["IPCShmSend.h"],
+    linkopts = ["-lpthread"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lib:FileHandler",
+        "//lib:IPC",
+        "//lib:IPCShm",
+    ],
+)
+
+cc_library(
+    name = "IPCShmReceive",
+    srcs = ["IPCShmReceive.cpp"],
+    hdrs = ["IPCShmReceive.h"],
+    linkopts = ["-lpthread"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lib:FileHandler",
+        "//lib:IPC",
+        "//lib:IPCShm",
     ],
 )

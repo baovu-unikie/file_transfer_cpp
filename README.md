@@ -46,15 +46,15 @@ ipc_receive -q /queue_name -f file_name
 ---
 
 ## Todo
-- [ ] Message Quue
+- [x] Message Quue
     - [x] Functional
     - [x] Test cases
 - [x] Pipe
     - [x] Functional
     - [x] Test cases
-- [ ] Shared Memory
-    - [ ] Functional
-    - [ ] Test cases
+- [x] Shared Memory
+    - [x] Functional
+    - [x] Test cases
 - [x] Scripts
     - [x] `environment_setup.sh`
     - [x] `build_and_test.sh`
@@ -62,7 +62,7 @@ ipc_receive -q /queue_name -f file_name
   - [x] Current implementation
   - [x] Future (plan) implementation
 - [ ] Documentation (`doxygen`) [Link to documentation](https://baovu-unikie.github.io/file_transfer_cpp/)
-- [ ] Test coverage report (`lcov`)
+- [x] Test coverage report (`lcov`)
 
 ---
 

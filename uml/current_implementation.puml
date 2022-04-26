@@ -92,6 +92,53 @@ class IPCPipeSend
 	+ void transfer() override;
 }
 
+class IPCShm
+{
+	# int shmd{};
+	# pthread_mutexattr_t mutex_attr{};
+	# pthread_condattr_t cond_attr{};
+	# ipc_shm_header_t *shm_ptr{};
+	# std::streamsize shm_size_in_bytes{};
+	# bool is_end{false};
+
+	+ explicit IPCShm(std::streamsize size) : shm_size_in_bytes(size){};
+	+ ~IPCShm();
+	+ void init_cond();
+	+ void init_mutex();
+	+ void lock_mutex();
+	+ void send_cond_broadcast();
+	+ void set_shm_size() const;
+	+ void unlock_mutex();
+}
+
+class IPCShmReceive
+{
+	# unsigned number_of_tries {10};
+	# size_t last_version{0};
+	+ explicit IPCShmReceive(ipc_options_t options)
+	 : IPC(options),
+	 	FileHandler(options.file_name, FileMode::WRITE),
+	 	IPCShm(options.mem_size*1024){};
+	+ ~IPCShmReceive();
+	+ void init() override;
+	+ void map_shm();
+	+ void open_shm();
+	+ void transfer() override;
+}
+
+class IPCShmSend
+{
+	+explicit IPCShmSend(ipc_options_t options)
+	: IPC(options),
+	FileHandler(options.file_name, FileMode::READ),
+	IPCShm(options.mem_size*1024){};
+
+	+~IPCShmSend();
+	+void init() override;
+	+void transfer() override;
+	+void open_shm();
+	+void map_shm();
+}
 
 class ChronoTime
 {
@@ -104,7 +151,6 @@ class ChronoTime
 	+ void update_end()
 	+ long get_duration()
 }
-
 enum IPCProtocol<<enumeration>>
 {
 	+ NONE
@@ -128,6 +174,29 @@ class ipc_option_t << (S,lightblue) struct>>
 	+ size_t mem_size{0}
 }
 
+class ipc_info_t << (S,lightblue) struct>>
+{
+	+ long number_of_msg{}
+	+ long read_bytes{}
+	+ long sent_bytes{}
+	+ unsigned long file_size{}
+	+ unsigned long total_sent_bytes{}
+}
+
+class ipc_shm_header_t << (S,lightblue) struct>>
+{
+	+ pthread_cond_t cond;
+	+ pthread_mutex_t mutex;
+	+ std::streamsize data_size;
+	+ size_t data_version;
+	+ std::streamsize shared_mem_size;
+	+ volatile bool is_init;
+	+ volatile bool is_read;
+	+ char data_ap[0];
+}
+
+
+
 IPC <|-- IPCMsgQSend
 FileHandler <|-- IPCMsgQSend
 IPC <|-- IPCMsgQReceive
@@ -138,9 +207,18 @@ FileHandler <|-- IPCPipeSend
 IPC <|-- IPCPipeReceive
 FileHandler <|-- IPCPipeReceive
 
+IPC <|-- IPCShmSend
+FileHandler <|-- IPCShmSend
+IPCShm <|-- IPCShmSend
+IPC <|-- IPCShmReceive
+FileHandler <|-- IPCShmReceive
+IPCShm <|-- IPCShmReceive
+
+IPCShm -- ipc_shm_header_t
 IPCProtocol -- ipc_option_t
 ipc_option_t -- IPC
 ipc_option_t -- IPCMode
+ipc_info_t --  IPC
 ChronoTime -- IPC
 
 @enduml
