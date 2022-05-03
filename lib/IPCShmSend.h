@@ -21,8 +21,6 @@ class IPCShmSend: public IPC, public FileHandler, public IPCShm
 		~IPCShmSend();
 		void init() override;
 		void transfer() override;
-		void open_shm();
-		void map_shm();
 };
 
 #endif //IPCSHMSEND_H

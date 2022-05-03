@@ -56,20 +56,23 @@ void IPCHandler::set_options(IPCMode m, std::vector<std::string> argv)
 			usage(true);
 	}
 
-	if (opts.protocol == IPCProtocol::MSG_QUEUE || opts.protocol == IPCProtocol::SHARED_MEM)
+	unsigned number_of_slashes{0};
+	for (auto c: opts.server_name)
+		if (c == '/')
+			number_of_slashes++;
+
+	if (opts.protocol == IPCProtocol::MSG_QUEUE && (opts.server_name.at(0) != '/' || opts.server_name.size() == 1 || number_of_slashes > 1))
 	{
-		unsigned number_of_slashes{0};
-		for (auto c: opts.server_name)
-			if (c == '/')
-				number_of_slashes++;
-
-		if (opts.server_name.at(0) != '/' || opts.server_name.size() == 1 || number_of_slashes > 1)
 			throw std::runtime_error("ERROR: Invalid server name. ");
-
-		if (opts.protocol == IPCProtocol::SHARED_MEM &&
-			(opts.mem_size <= 0 || opts.mem_size > SHARED_MEM_LIMIT_IN_KB))
+	}
+	if (opts.protocol == IPCProtocol::SHARED_MEM && (opts.mem_size <= 0 || opts.mem_size > SHARED_MEM_LIMIT_IN_KB))
+	{
 			throw std::runtime_error(std::string("ERROR: Invalid memory size. It should be in range [1,") +
 									 std::to_string(SHARED_MEM_LIMIT_IN_KB) + "].");
+	}
+	if (opts.protocol == IPCProtocol::SHARED_MEM && number_of_slashes > 0)
+	{
+		throw std::runtime_error("ERROR: Invalid server name. Shared memory name should not include any slash.");
 	}
 }
 
@@ -82,7 +85,7 @@ void IPCHandler::usage(bool is_exit) const
 		description = "sends a file using a specified protocol.";
 		example1 = "ipc_send -f file_to_send -q /queue_name";
 		example2 = "ipc_send -f file_to_send -p pipe_name";
-		example3 = "ipc_send -f file_to_send -s /shm_name 4";
+		example3 = "ipc_send -f file_to_send -s shm_name 4";
 	}
 	if (this->opts.mode == IPCMode::RECEIVE_MODE)
 	{
@@ -90,7 +93,7 @@ void IPCHandler::usage(bool is_exit) const
 		description = "receives file using a specified protocol";
 		example1 = "ipc_receive -f file_name -q /queue_name";
 		example2 = "ipc_receive -f file_name -p pipe_name";
-		example3 = "ipc_receive -f file_name -s /shm_name 4";
+		example3 = "ipc_receive -f file_name -s shm_name 4";
 	}
 
 	std::cout << "===========================================================================\n"
@@ -106,7 +109,6 @@ void IPCHandler::usage(bool is_exit) const
 			  << "                 QUEUE_NAME should be started with '/' character.\n"
 			  << "    -p | --pipe PIPE_NAME\n"
 			  << "    -s | --shm SHARED_MEM_NAME SIZE_OF_SHM_IN_KB\n"
-			  << "               SHARED_MEM_NAME should be started with '/' character.\n"
 			  << "               0 < SIZE_OF_SHM_IN_KB ≤ " << SHARED_MEM_LIMIT_IN_KB << "\n"
 			  << "EXAMPLES\n"
 			  << "  " << example1 << "\n"

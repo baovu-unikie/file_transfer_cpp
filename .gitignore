@@ -17,3 +17,4 @@ data/*
 !lib/
 !app/
 !test/
+!possible_problems
