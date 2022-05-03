@@ -22,7 +22,7 @@ void IPCShmSend::init()
 	shm_region_ptr = std::make_shared<mapped_region>(*shm_obj_ptr, read_write);
 
 	// get shm_ptr
-	this->shm_ptr = new (shm_region_ptr->get_address()) ipc_shm_header_t;
+	this->shm_ptr = new(shm_region_ptr->get_address()) ipc_shm_header_t;
 	this->shm_ptr->is_end = false;
 	this->shm_ptr->is_init = true;
 	this->shm_ptr->shared_mem_size = this->shm_size_in_bytes;
@@ -47,11 +47,12 @@ void IPCShmSend::transfer()
 	while (!this->shm_ptr->is_end && this->timer.get_duration() < this->timeout)
 	{
 		{
-			scoped_lock<interprocess_mutex> lock(this->shm_ptr->mutex, std::chrono::system_clock::now() + this->shm_timeout);
+			scoped_lock<interprocess_mutex> lock(this->shm_ptr->mutex,
+												 std::chrono::system_clock::now() + this->shm_timeout);
 			if (this->shm_ptr->msg_in)
 				this->shm_ptr->cond_received.wait_for(lock, this->shm_timeout);
 
-			if(!this->shm_ptr->msg_in)
+			if (!this->shm_ptr->msg_in)
 			{
 				if (!this->fs.eof())
 				{

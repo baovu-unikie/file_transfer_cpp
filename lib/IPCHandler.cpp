@@ -61,14 +61,15 @@ void IPCHandler::set_options(IPCMode m, std::vector<std::string> argv)
 		if (c == '/')
 			number_of_slashes++;
 
-	if (opts.protocol == IPCProtocol::MSG_QUEUE && (opts.server_name.at(0) != '/' || opts.server_name.size() == 1 || number_of_slashes > 1))
+	if (opts.protocol == IPCProtocol::MSG_QUEUE &&
+		(opts.server_name.at(0) != '/' || opts.server_name.size() == 1 || number_of_slashes > 1))
 	{
-			throw std::runtime_error("ERROR: Invalid server name. ");
+		throw std::runtime_error("ERROR: Invalid server name. ");
 	}
 	if (opts.protocol == IPCProtocol::SHARED_MEM && (opts.mem_size <= 0 || opts.mem_size > SHARED_MEM_LIMIT_IN_KB))
 	{
-			throw std::runtime_error(std::string("ERROR: Invalid memory size. It should be in range [1,") +
-									 std::to_string(SHARED_MEM_LIMIT_IN_KB) + "].");
+		throw std::runtime_error(std::string("ERROR: Invalid memory size. It should be in range [1,") +
+								 std::to_string(SHARED_MEM_LIMIT_IN_KB) + "].");
 	}
 	if (opts.protocol == IPCProtocol::SHARED_MEM && number_of_slashes > 0)
 	{
